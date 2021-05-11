@@ -20,10 +20,13 @@ class AttackCreate:
     ruleList = []
     # dataframe字段？
     # time, can_id, data_in_binary, data_in_hex
-    # 两个dataframe表格
-    beforeChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
-    afterChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
+    # 两个dataframe表格，这两个表格是没有意义的
+    # beforeChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
+    beforeChangedData = pd.DataFrame(columns = ['time', 'can_id', 'data_in_binary', 'data_in_hex'])
+    # afterChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
+    afterChangedData = pd.DataFrame(columns = ['time', 'can_id', 'data_in_binary', 'data_in_hex'])
     # empty = empty.append(new, ignore_index=True)​ 这个是最终的递增方法，是确定的
+    store_place = "../src/attack_test"
 
     def renewChangeInformation(self, pre, next):
         self.beforeChangedData = self.beforeChangedData.append(pre, ignore_index = True)
@@ -53,6 +56,7 @@ class AttackCreate:
     # 这个是填充数据类的内容
     def load_data(self):
         # 这里的数据来自上传的源数据，需要以后再慢慢考虑的
+        # 使用简单的手段制造攻击
         return None
     # DataList
     # 不同的attack有不同的精度参数，也就是说这里的列表白给了？
@@ -84,7 +88,7 @@ class AttackCreate:
         abnorma_T = normal_T/ratio
         end_time = exist_time + begin_time
 
-        for i in range(1, self.origin_data.shape[0]-1):
+        for i in range(1, self.sourceDataSnippet.shape[0]-1):
             # 进行按行访问
             if begin_time >= tmp_origin_data.iloc[i]['time'] and begin_time <= tmp_origin_data.iloc[i]['time']:
 
@@ -116,6 +120,11 @@ class AttackCreate:
             os.mkdir(self.store_place)
 
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
+
+        # 记得这里要把所有数据都导入
+        self.beforeChangedData.to_csv(self.store_place + "/" + "before_" + document_name)
+        self.afterChangedData.to_csv(self.store_place + "/" + "after_" + document_name)
+        # 最好加一个异常或者正常标志位，这个要求稍微有点高的。
 
     # 删除攻击，在某一个时间段，去掉某个id的所有报文
     def erase_attack(self, id, exist_time):
