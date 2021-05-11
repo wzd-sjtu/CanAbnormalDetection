@@ -8,7 +8,6 @@ from BasicClass import SingleData,\
 from CodingTypeChange import hex_str_to_binary_str, \
     binary_str_to_hex_str
 
-
 class AttackCreate:
     # 这个类里面有一些复杂的元素，暂时还没有完全实现的
     # 存储结构为dataframe结构，这一点是确定的
@@ -20,12 +19,15 @@ class AttackCreate:
     ruleList = []
     # dataframe字段？
     # time, can_id, data_in_binary, data_in_hex
-    # 两个dataframe表格，这两个表格是没有意义的
+    # 两个dataframe表格，这两个表格专门用于存储攻击信息，内容是固定的，是否有别的信息要加上去呢？
+
     # beforeChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
     beforeChangedData = pd.DataFrame(columns = ['time', 'can_id', 'data_in_binary', 'data_in_hex'])
     # afterChangedData = pd.DataFrame({"time":"","can_id":"","data_in_binary":"", "data_in_hex":""})
     afterChangedData = pd.DataFrame(columns = ['time', 'can_id', 'data_in_binary', 'data_in_hex'])
     # empty = empty.append(new, ignore_index=True)​ 这个是最终的递增方法，是确定的
+
+    # 专门用于存放目标地址信息
     store_place = "../src/attack_test"
 
     def renewChangeInformation(self, pre, next):
@@ -114,6 +116,7 @@ class AttackCreate:
                     break
 
         # 攻击报文存储
+        # 之前想的是把这里的load报文抽象一下，现在看来好像稍微不可行
         self.store_place = "../src/attack_test"
         document_name = document_name + str(begin_time) + "_" + str(self.input_num)+".csv"
         if not os.path.exists(self.store_place):
@@ -288,6 +291,7 @@ class AttackCreate:
     # 整个程序的粒度还是不太够，代码的耦合性还是有点过强了
     # 以后在debug中，可能会遇上无法计算的bug
     # 发现这里修改的是二进制数据？64位二进制
+    # 其实数据域修改并没有完善，还是有很多问题的
     def change_data_field(self, binary_str):
         return binary_str
 

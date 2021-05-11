@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
+# 这里免去把所有的功能写在一起，造成无法预知的后果。
 class LoadDataClass:
     # 这里统一规定load的数据格式，算是一种去耦合的方式
     sourceDataSnippet = None
