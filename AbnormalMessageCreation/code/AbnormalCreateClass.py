@@ -7,6 +7,7 @@ from BasicClass import SingleData,\
     DataList, DataListType, Rule
 from CodingTypeChange import hex_str_to_binary_str, \
     binary_str_to_hex_str
+from AbnormalDescriptionClass import AbnormalDescriptionClass
 
 class AttackCreate:
     # 这个类里面有一些复杂的元素，暂时还没有完全实现的
@@ -16,6 +17,9 @@ class AttackCreate:
     # 各种重放攻击的来源源头
     historyNormalDataSnippet = None
 
+    # 专门用于存储修改报文的information
+
+    descriptionStruct = AbnormalDescriptionClass()
     ruleList = []
     # dataframe字段？
     # time, can_id, data_in_binary, data_in_hex
@@ -30,14 +34,6 @@ class AttackCreate:
     # 专门用于存放目标地址信息
     store_place = "../src/attack_test"
 
-    def renewChangeInformation(self, pre, next):
-        self.beforeChangedData = self.beforeChangedData.append(pre, ignore_index = True)
-        self.afterChangedData = self.afterChangedData.append(next, ignore_index=True)
-    # 两个函数，专门为了重放攻击开发的
-    def renewChangeInformationPre(self, pre):
-        self.beforeChangedData = self.beforeChangedData.append(pre, ignore_index=True)
-    def renewChangeInformationNext(self, next):
-        self.afterChangedData = self.afterChangedData.append(next, ignore_index=True)
 
     def __init__(self):
         # 原本的类是没有必要放进去的，直接用新的类即可
@@ -55,16 +51,6 @@ class AttackCreate:
         # 这里命名有点过于随意了
         self.input_num = None
         self.source_num = None
-    # 这个是填充数据类的内容
-    def load_data(self):
-        # 这里的数据来自上传的源数据，需要以后再慢慢考虑的
-        # 使用简单的手段制造攻击
-        return None
-    # DataList
-    # 不同的attack有不同的精度参数，也就是说这里的列表白给了？
-
-    def create_attack(self):
-        return None
 
     # 注入攻击，在某个时间段，注入某一个id的报文，数据字段可靠性不保证
     def insert_attack(self, id, normal_T, ratio, exist_time):
@@ -102,11 +88,17 @@ class AttackCreate:
                 df3 = tmp_origin_data.iloc[i]
                 df3 = df3.copy()
 
+                # data字段来自于别的地方，这样是合理的吗？暂时不清楚的
                 df3['time'] = begin_time
                 df3['can_id'] = id
 
                 # 这里是注入攻击
-                self.renewChangeInformation(df3, df3)
+                descriptionTmp = "This is an insert attack!"
+                # def updateBasicInformation(self, type, id, time, description, data_in_binary):
+                self.descriptionStruct.updateBasicInformation(1, df3['can_id'],
+                                                              df3['time'],
+                                                              descriptionTmp,
+                                                              df3['data_in_binary'])
 
                 tmp_origin_data = (df1.append(df3)).append(df2)
                 # print(tmp_origin_data.shape[0])
@@ -121,13 +113,13 @@ class AttackCreate:
         document_name = document_name + str(begin_time) + "_" + str(self.input_num)+".csv"
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
-
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
 
         # 记得这里要把所有数据都导入
-        self.beforeChangedData.to_csv(self.store_place + "/" + "before_" + document_name)
-        self.afterChangedData.to_csv(self.store_place + "/" + "after_" + document_name)
+        # self.beforeChangedData.to_csv(self.store_place + "/" + "before_" + document_name)
+        # self.afterChangedData.to_csv(self.store_place + "/" + "after_" + document_name)
         # 最好加一个异常或者正常标志位，这个要求稍微有点高的。
+        self.descriptionStruct.writeIntoCsv()
 
     # 删除攻击，在某一个时间段，去掉某个id的所有报文
     def erase_attack(self, id, exist_time):

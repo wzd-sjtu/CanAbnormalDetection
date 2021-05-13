@@ -16,5 +16,11 @@ class LoadDataClass:
         # do_nothing
         self.sourceDataSnippet = pd.read_csv(path1, index_col=0)
         self.historyNormalDataSnippet = pd.read_csv(path2, index_col=0)
+    def readOriginData(self):
+        # 直接从源读取数据，需要适当修改一下的
+        self.sourceDataSnippet = pd.read_csv("../src/webOriginData/test_res.csv", index_col=0,
+                                             usecols=[0, 1, 2, 12, 13, 14, 15, 16])
+        self.historyNormalDataSnippet = pd.read_csv("../src/webOriginData/test_res.csv", index_col=0,
+                                                    usecols=[0, 1, 2, 12, 13, 14, 15, 16])
     # 至此完成简单的数据初始化
 
