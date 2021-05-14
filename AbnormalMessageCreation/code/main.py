@@ -1,5 +1,7 @@
 from AbnormalCreateClass import AttackCreate
 from LoadDataClass import LoadDataClass
+from BasicClass import DataFieldAttackInformation
+
 if __name__ == '__main__':
     path1 = "../src/testData/0.csv"
     path2 = "../src/testData/1.csv"
@@ -27,7 +29,16 @@ if __name__ == '__main__':
     # attackCreateExample.reput_attack_SingleId("82", 0.2)
     # 这种全体reput貌似需要一小段时间？为了时间对齐！
     # attackCreateExample.reput_attack_AllData(0.1)
-    attackCreateExample.changedatafield_attack_randomly('82', 0.2)
+    # attackCreateExample.changedatafield_attack_randomly('82', 0.2)
+
+    #
+
+    # attackCreateExample.changedatafield_attack_const_or_multivalue('565', 0.2)
     # attackCreateExample.get_rule(" ")
+
+    valueAttackInfo = DataFieldAttackInformation()
+    valueAttackInfo.attackChoseType = valueAttackInfo.sensorAttack
+    valueAttackInfo.relatedThing = valueAttackInfo.max_value_attack
+    attackCreateExample.change_data_field(valueAttackInfo, '82', 0.02)
 
 

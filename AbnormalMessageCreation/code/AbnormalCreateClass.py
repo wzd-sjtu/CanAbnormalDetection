@@ -490,7 +490,197 @@ class AttackCreate:
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
         self.descriptionStruct.writeIntoCsv()
 
+    # 我直接裂开，测试不了emm
+    def changedatafield_attack_const_or_multivalue(self, id, exist_time):
+        # 这二者的名字是一样的？但是攻击类型是否需要相同呢？暂时是未知的
+        self.get_rule(" ")
+        document_name = "changedatafield_attack_test.csv"
+        # 从源数据中提取重放数据
+        begin_time = random.random()
+        begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
+        begin_time = self.sourceDataSnippet.iloc[round(begin_time)]['time']
+        tmp_origin_data = self.sourceDataSnippet
+        end_time = exist_time + begin_time
+
+        # 首先得到目标列表，存放的是Rule Class的类
+        tmp_rule_list = self.myRuleMap.getTargetCanIdRule(id)
+        final_rule_list = []
+        for item in tmp_rule_list:
+            if item.type_of_class == 2 or item.type_of_class == 4:
+                final_rule_list.append(item)
+        # 存储好我们接下来要操作的类即可，这种操作是某种程度 to some extent 合理的
+        # 这里就随便选几个规则，都改一改
+
+        for i in range(0, self.sourceDataSnippet.shape[0]):
+            if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time \
+                    and tmp_origin_data.iloc[i]['can_id'] == id:
+                # 正式进入random环节
+                # 从前半部分直接random到后半部分
+                print("successfully")
+
+                random_num = round(random.random()*(len(final_rule_list)-1)) # 取到这个值即可
+
+                ruleSingle = final_rule_list[random_num]
+
+                random_begin_bit = ruleSingle.begin_loc
+                length_of_bit = ruleSingle.length
+                random_end_bit = ruleSingle.end_loc
+                val_range = ruleSingle.range
+
+
+                target_binary_bit = tmp_origin_data.iloc[i]['data_in_binary']
+                descriptionTmp = ""
+                if ruleSingle.type_of_class == 2:
+                    descriptionTmp = descriptionTmp + "This is a const value: "
+                else: # multi表示有很多个数值，处理过程是合理的
+                    descriptionTmp = descriptionTmp + "This is a multi value: "
+
+                descriptionTmp = "before binary is " + target_binary_bit[random_begin_bit:random_end_bit + 1]
+
+                target_binary_bit = list(target_binary_bit)
+                for love in range(random_begin_bit, random_end_bit + 1):
+                    if (random.random() > 0.5):
+                        target_binary_bit[love] = '0'
+                    else:
+                        target_binary_bit[love] = '1'
+
+                target_binary_bit = "".join(target_binary_bit)
+                descriptionTmp = descriptionTmp + " end binary is " + target_binary_bit[
+                                                                      random_begin_bit:random_end_bit + 1]
+                tmp_origin_data.loc[i, 'data_in_binary'] = target_binary_bit
+                tmp_origin_data.loc[i, 'data_in_hex'] = binary_str_to_hex_str(target_binary_bit)
+                tmp_origin_data.loc[i, 'anormal'] = 6
+                hex_data = binary_str_to_hex_str(target_binary_bit)
+                for peace in range(0, 8):
+                    tmp_origin_data.loc[i, 'data' + str(peace)] = hex_data[2 * peace:2 * peace + 2]
+
+                df3 = tmp_origin_data.iloc[i]
+
+                self.descriptionStruct.updateBasicInformation(6, df3['can_id'],
+                                                              df3['time'],
+                                                              descriptionTmp,
+                                                              df3['data_in_binary'])
+
+        self.store_place = "../src/attack_test"
+        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        if not os.path.exists(self.store_place):
+            os.mkdir(self.store_place)
+        tmp_origin_data.to_csv(self.store_place + "/" + document_name)
+        self.descriptionStruct.writeIntoCsv()
+
+
+    def changedatafield_attack_sensro(self, id, exist_time, basicType):
+        # 不知道传感器的攻击可以选择到什么粒度，也不知道究竟可以制造哪种类型的攻击呢？
+        # 这几者都是暂时未知的
+        # 实际上，sensor的修改尺度是由attackType决定的，这是一个复杂的攻击配置变量
+        # 这二者的名字是一样的？但是攻击类型是否需要相同呢？暂时是未知的
+        self.get_rule(" ")
+        document_name = "changedatafield_attack_test.csv"
+        # 从源数据中提取重放数据
+        begin_time = random.random()
+        begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
+        begin_time = self.sourceDataSnippet.iloc[round(begin_time)]['time']
+        tmp_origin_data = self.sourceDataSnippet
+        end_time = exist_time + begin_time
+
+        # 首先得到目标列表，存放的是Rule Class的类
+        tmp_rule_list = self.myRuleMap.getTargetCanIdRule(id)
+        final_rule_list = []
+        for item in tmp_rule_list:
+            if item.type_of_class == 1:
+                final_rule_list.append(item)
+        # 存储好我们接下来要操作的类即可，这种操作是某种程度 to some extent 合理的
+        # 这里就随便选几个规则，都改一改
+
+        for i in range(0, self.sourceDataSnippet.shape[0]):
+            if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time \
+                    and tmp_origin_data.iloc[i]['can_id'] == id:
+                # 正式进入random环节
+                # 从前半部分直接random到后半部分
+
+                random_num = round(random.random() * (len(final_rule_list) - 1))  # 取到这个值即可
+
+                ruleSingle = final_rule_list[random_num]
+
+                random_begin_bit = ruleSingle.begin_loc
+                length_of_bit = ruleSingle.length
+                random_end_bit = ruleSingle.end_loc
+                val_range = ruleSingle.range
+
+                # 接下来对传感器的change是严格的，在某种程度上是严格的
+
+                target_binary_bit = tmp_origin_data.iloc[i]['data_in_binary']
+                descriptionTmp = "This is sensor value changing "
+
+                # 这里居然使用的是硬编码，将来是很有可能出现问题的
+                if basicType == 0:
+                    descriptionTmp = descriptionTmp + " max-value change "
+                elif basicType == 1:
+                    descriptionTmp = descriptionTmp + " min-value change "
+                elif basicType == 2:
+                    descriptionTmp = descriptionTmp + " random-value change "
+                elif basicType == 3:
+                    descriptionTmp = descriptionTmp + " apt advanced change "
+
+                descriptionTmp = "before binary is " + target_binary_bit[random_begin_bit:random_end_bit + 1]
+
+                target_binary_bit = list(target_binary_bit)
+
+                if basicType == 2: # 不一定在传感器取值范围
+                    for love in range(random_begin_bit, random_end_bit + 1):
+                        if (random.random() > 0.5):
+                            target_binary_bit[love] = '0'
+                        else:
+                            target_binary_bit[love] = '1'
+                elif basicType == 0:
+                    for love in range(random_begin_bit, random_end_bit + 1):
+                        target_binary_bit[love] = '1'
+                elif basicType == 1:
+                    for love in range(random_begin_bit, random_end_bit + 1):
+                        target_binary_bit[love] = '0'
+
+
+                target_binary_bit = "".join(target_binary_bit)
+                descriptionTmp = descriptionTmp + " end binary is " + target_binary_bit[
+                                                                      random_begin_bit:random_end_bit + 1]
+                tmp_origin_data.loc[i, 'data_in_binary'] = target_binary_bit
+                tmp_origin_data.loc[i, 'data_in_hex'] = binary_str_to_hex_str(target_binary_bit)
+                tmp_origin_data.loc[i, 'anormal'] = 7
+                hex_data = binary_str_to_hex_str(target_binary_bit)
+                for peace in range(0, 8):
+                    tmp_origin_data.loc[i, 'data' + str(peace)] = hex_data[2 * peace:2 * peace + 2]
+
+                df3 = tmp_origin_data.iloc[i]
+
+                self.descriptionStruct.updateBasicInformation(7, df3['can_id'],
+                                                              df3['time'],
+                                                              descriptionTmp,
+                                                              df3['data_in_binary'])
+
+        self.store_place = "../src/attack_test"
+        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        if not os.path.exists(self.store_place):
+            os.mkdir(self.store_place)
+        tmp_origin_data.to_csv(self.store_place + "/" + document_name)
+        self.descriptionStruct.writeIntoCsv()
+
+
+        return
+
+    # 到现在为止，一共造出了7种攻击，以及很多需要配置的参数
+    # 需要单独开一个类，对攻击进行描述，提供可供选择的type哦
+
     # 别的修改方式和这里的随机修改，在整个大框架上绝对是相似的
-    def change_data_field(self, binary_str):
-        return binary_str
+    def change_data_field(self, attackBasicInformation, id, exist_time):
+        # 这里的attackBasicInformation 专门用于分支循环调用
+        if attackBasicInformation.attackChoseType == attackBasicInformation.randomAttack:
+            self.changedatafield_attack_randomly(id, exist_time)
+        elif attackBasicInformation.attackChoseType == attackBasicInformation.constOrMultivalueAttack:
+            self.changedatafield_attack_const_or_multivalue(id, exist_time)
+        elif attackBasicInformation.attackChoseType == attackBasicInformation.sensorAttack:
+            self.changedatafield_attack_sensro(id, exist_time, attackBasicInformation.relatedThing)
+        return
+
+    # 至此，应当是完成了这个基本类的编写
+    # 后面需要把这个数据结构部署到网页上去，从而为将来的展示打下较好的基础
 

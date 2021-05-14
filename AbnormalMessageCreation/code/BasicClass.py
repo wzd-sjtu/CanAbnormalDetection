@@ -107,8 +107,18 @@ class RuleMap():
 class DataFieldAttackType:
     None
 
-
-class DataFieldChangeBasicParameters:
+    # 如何把选项抽象为一个具体的类呢？暂时是不清楚的
+class DataFieldAttackInformation:
     def __init__(self):
         return
-    # 如何把选项抽象为一个具体的类呢？暂时是不清楚的
+    randomAttack = 1
+    constOrMultivalueAttack = 2
+    sensorAttack = 3
+
+    max_value_attack = 0
+    min_value_attack = 1
+    random_value_attack = 2
+    apt_advanced_value_attack = 3
+
+    attackChoseType = None
+    relatedThing = None
