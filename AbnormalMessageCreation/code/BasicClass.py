@@ -9,6 +9,8 @@ class SingleData:
     data_in_binary = None
 
 # 用于枚举数据序列的类型 想要自己定义什么类，可以直接往里面加
+
+# 这个是设计的比较easy的类？
 class DataListType():
     origin_data_list = 1 # 原始数据
     split_by_canid_origin_data_list = 2 # 按照can_id分割的原始数据
@@ -104,3 +106,9 @@ class RuleMap():
 
 class DataFieldAttackType:
     None
+
+
+class DataFieldChangeBasicParameters:
+    def __init__(self):
+        return
+    # 如何把选项抽象为一个具体的类呢？暂时是不清楚的

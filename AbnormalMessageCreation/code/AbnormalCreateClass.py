@@ -9,6 +9,7 @@ from CodingTypeChange import hex_str_to_binary_str, \
     binary_str_to_hex_str
 from AbnormalDescriptionClass import AbnormalDescriptionClass
 
+# 写代码结构化有利于自己写的更清晰
 class AttackCreate:
     # 这个类里面有一些复杂的元素，暂时还没有完全实现的
     # 存储结构为dataframe结构，这一点是确定的
@@ -225,14 +226,10 @@ class AttackCreate:
             # 进行按行访问
             if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time:
                 if tmp_origin_data.iloc[i]['can_id'] == id and list_loc < len(reput_packet_data_in_hex):
-                    # tmp_origin_data.iloc[i]['data_in_hex'] = reput_packet_data_in_hex[list_loc]
-                    # tmp_origin_data.iloc[i]['data_in_binary'] = reput_packet_data_in_binary[list_loc]
-                    # 不妨使用带索引数据
-                    # 在这里使用索引修改数据
 
-                    tmp_origin_data[i,'data_in_hex'] = reput_packet_data_in_hex[list_loc]
-                    tmp_origin_data[i, 'data_in_binary'] = reput_packet_data_in_binary[list_loc]
-                    tmp_origin_data[i, 'anormal'] = 3
+                    tmp_origin_data.loc[i,'data_in_hex'] = reput_packet_data_in_hex[list_loc]
+                    tmp_origin_data.loc[i, 'data_in_binary'] = reput_packet_data_in_binary[list_loc]
+                    tmp_origin_data.loc[i, 'anormal'] = 3
                     df3 = tmp_origin_data.iloc[i]
                     descriptionTmp = "This data is reput, can you find it? There is no more information"
                     self.descriptionStruct.updateBasicInformation(3, df3['can_id'],
@@ -292,9 +289,7 @@ class AttackCreate:
             else:
                 continue
 
-        # 直接进行数据切片即可
-        reputList = tmp_origin_data.iloc[begin_loc_of_data:end_loc_of_data].copy()
-        # print(reputList)
+
 
         # 下面处理重放的目标元数据
         # 记得完成标记操作哦
@@ -303,7 +298,9 @@ class AttackCreate:
         begin_time = self.sourceDataSnippet.shape[0] * (1 / 3) * begin_time
         begin_time = self.sourceDataSnippet.iloc[round(begin_time)]['time']
         # copy是为了防止更改原始数据
-        tmp_origin_data = self.sourceDataSnippet.copy()
+
+        # copy就是把数据完成了复制的过程
+        tmp_origin_data = self.sourceDataSnippet
         # tmp_origin_data = tmp_origin_data.copy()
         end_time = exist_time + begin_time
 
@@ -325,33 +322,33 @@ class AttackCreate:
                     continue
             else:
                 continue
-        end_loc_of_data = begin_loc_of_data + reputList.shape[0]
-        all_len = tmp_origin_data.shape[0]
-        df1 = tmp_origin_data[0:begin_loc_of_data]
-        df2 = tmp_origin_data[end_loc_of_data:all_len]
-        df3List = tmp_origin_data[begin_loc_of_data:end_loc_of_data]
-        # 实际上，还是做时间区间映射是比较好的，直接用全体数据完全重放，不知道会有什么后果？
+        end_loc_of_data = begin_loc_of_data + pre_end_loc_of_data - pre_begin_loc_of_data
+        # 找到结尾坐标就是最好的解决方式
 
-        # 这里不可以使用索引，数据表大幅度修改
-        time_basic = df3List.iloc[0]['time']
-        diff_basic_minus = reputList.iloc[0]['time'] - time_basic
+        tmp_origin_data = self.historyNormalDataSnippet.copy() # 直接copy所有数据，切片是无法赋值的
+        tmp_origin_data_next = self.sourceDataSnippet
 
-        reputList.reset_index(inplace=True, drop=True)
-        # print(diff_basic_minus)
-        for reput_all_data_loc in range(0, reputList.shape[0]):
-            # 直接时间填入，显然会造成时间割裂？
-            reputList.iloc[[reput_all_data_loc]]['anormal'] = 4
-            reputList.iloc[[reput_all_data_loc]]['time'] = reputList.iloc[[reput_all_data_loc]]['time'] - diff_basic_minus
-
-
-            df3 = reputList.iloc[reput_all_data_loc]
+        time_diff = tmp_origin_data.iloc[pre_begin_loc_of_data]['time'] - tmp_origin_data_next.iloc[begin_loc_of_data]['time']
+        print(time_diff)
+        for love in range(pre_begin_loc_of_data, pre_end_loc_of_data):
+            # 这个才是dataframe的最终精髓
+            # 只能用loc进行索引定位？iloc返回的总是切片
+            tmp_origin_data.loc[love, 'time'] = tmp_origin_data.iloc[love]['time'] - time_diff
+            tmp_origin_data.loc[love, 'anormal'] = 4
+            # 在这里就记得记录存在小问题的信息
+            df3 = tmp_origin_data.iloc[love]
             descriptionTmp = "This data is reput, can you find it? There is no more information"
             self.descriptionStruct.updateBasicInformation(4, df3['can_id'],
                                                           df3['time'],
                                                           descriptionTmp,
                                                           df3['data_in_binary'])
 
-        tmp_origin_data = (df1.append(reputList)).append(df2)
+        df1 = tmp_origin_data_next.iloc[0:begin_loc_of_data]
+        df2 = tmp_origin_data_next[end_loc_of_data:tmp_origin_data_next.shape[0]]
+        df3 = tmp_origin_data.iloc[pre_begin_loc_of_data:pre_end_loc_of_data]
+
+        tmp_origin_data = (df1.append(df3)).append(df2)
+
 
         self.store_place = "../src/attack_test"
         document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
@@ -362,10 +359,11 @@ class AttackCreate:
         self.descriptionStruct.writeIntoCsv()
         return None
 
+    # 以上的所有代码都不涉及复杂的修改
 
+    # get_rule 是已经测试过的函数
     def get_rule(self, doc_path):
         dfRule = pd.read_csv(self.ruleLocation)
-
 
         for row in dfRule.iterrows():
             # print(row[1]['can_id'])
@@ -378,22 +376,29 @@ class AttackCreate:
         return None
 
     # 数据域字段修改攻击，假设得到了某些邪恶的规则字段
-    def changedatafield_attack(self, id, doc_path, attackType, exist_time):
+    # 这里是经典的数据域修改攻击，这里的索引是what situation呢？
+    # 暂时不太清楚数据域修改攻击应当如何实现呢？
+    def changedatafield_attack(self, id, attackType, exist_time):
         # 这种数据域攻击主要有两种：
         # 一种是使用将某个字段设置为最大or最小常量
         # 另一种是历史序列重放，可以认为是变种重返攻击
-        self.get_rule(doc_path)
+        # doc path是完全不需要的
+        # 只对某种报文进行数据域修改，description也是暂时不需要的，应该是的吧
+
+        self.get_rule(" ")
 
         '''
-        const_tag = 0
-        multi_value_tag = 1
-        sensor_or_counter_tag = 2
-
-        counter_tag = 2
-        sensor_tag = 3
-        no_meaning_tag = 4
-
+        新的tag标志
+        
+        checksum_tag = 0
+        sensor_tag = 1
+        const_tag = 2
+        counter_tag = 3
+        multi_value_tag = 4
+        no_meaning_tag = 5
+        
         攻击的mod：
+        以下的mod如何决定呢？暂时是不清楚的哦
         const_attack: yes or no
         multi_value_atack: 统一修改为第i个数值，这里i的生成方式可以固定，也可以随机
         counter_attack: +1 +2 +3 修改数值即可
@@ -433,10 +438,59 @@ class AttackCreate:
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
         return None
 
-    # 整个程序的粒度还是不太够，代码的耦合性还是有点过强了
-    # 以后在debug中，可能会遇上无法计算的bug
-    # 发现这里修改的是二进制数据？64位二进制
-    # 其实数据域修改并没有完善，还是有很多问题的
+    # 这个是进行完全随机修改的实现函数，难度还是ok的
+    def changedatafield_attack_randomly(self, id, exist_time):
+        # attackType就是 case switch的根本决定因素
+        self.get_rule(" ")
+        document_name = "changedatafield_attack_test.csv"
+        # 从源数据中提取重放数据
+        begin_time = random.random()
+        begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
+        begin_time = self.sourceDataSnippet.iloc[round(begin_time)]['time']
+        tmp_origin_data = self.sourceDataSnippet
+        end_time = exist_time + begin_time
+
+        for i in range(0, self.sourceDataSnippet.shape[0]):
+            if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time \
+                    and tmp_origin_data.iloc[i]['can_id'] == id:
+                # 正式进入random环节
+                # 从前半部分直接random到后半部分
+                random_begin_bit = round(random.random()*32)
+                length_of_bit = round(random.random()*32)
+                random_end_bit = random_begin_bit + length_of_bit - 1
+
+                target_binary_bit = tmp_origin_data.iloc[i]['data_in_binary']
+                descriptionTmp = "before binary is " + target_binary_bit[random_begin_bit:random_end_bit+1]
+
+                target_binary_bit = list(target_binary_bit)
+                for love in range(random_begin_bit, random_end_bit+1):
+                    if(random.random()>0.5): target_binary_bit[love] = '0'
+                    else: target_binary_bit[love] = '1'
+
+                target_binary_bit = "".join(target_binary_bit)
+                descriptionTmp = descriptionTmp + " end binary is " + target_binary_bit[random_begin_bit:random_end_bit+1]
+                tmp_origin_data.loc[i, 'data_in_binary'] = target_binary_bit
+                tmp_origin_data.loc[i, 'data_in_hex'] = binary_str_to_hex_str(target_binary_bit)
+                tmp_origin_data.loc[i, 'anormal'] = 5
+                hex_data = binary_str_to_hex_str(target_binary_bit)
+                for peace in range(0, 8):
+                    tmp_origin_data.loc[i, 'data' + str(peace)] = hex_data[2*peace:2*peace+2]
+
+                df3 = tmp_origin_data.iloc[i]
+
+                self.descriptionStruct.updateBasicInformation(5, df3['can_id'],
+                                                              df3['time'],
+                                                              descriptionTmp,
+                                                              df3['data_in_binary'])
+
+        self.store_place = "../src/attack_test"
+        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        if not os.path.exists(self.store_place):
+            os.mkdir(self.store_place)
+        tmp_origin_data.to_csv(self.store_place + "/" + document_name)
+        self.descriptionStruct.writeIntoCsv()
+
+    # 别的修改方式和这里的随机修改，在整个大框架上绝对是相似的
     def change_data_field(self, binary_str):
         return binary_str
 

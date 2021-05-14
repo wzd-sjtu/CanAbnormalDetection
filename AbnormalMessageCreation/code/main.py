@@ -26,7 +26,8 @@ if __name__ == '__main__':
     # def reput_attack_SingleId(self, id, exist_time):
     # attackCreateExample.reput_attack_SingleId("82", 0.2)
     # 这种全体reput貌似需要一小段时间？为了时间对齐！
-    attackCreateExample.reput_attack_AllData(0.1)
-    attackCreateExample.get_rule(" ")
+    # attackCreateExample.reput_attack_AllData(0.1)
+    attackCreateExample.changedatafield_attack_randomly('82', 0.2)
+    # attackCreateExample.get_rule(" ")
 
 
