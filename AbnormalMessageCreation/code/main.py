@@ -9,18 +9,24 @@ if __name__ == '__main__':
     # 制造攻击的速度并不需要特别的块，差不多就行了
     # 还有这个攻击的详细描述报告该怎样写呢？暂时是不清楚的
 
+    # 从location直接获取数据即可
     loadDataExample.readOriginData()
-    print(loadDataExample.sourceDataSnippet.iloc[0])
+    # print(loadDataExample.sourceDataSnippet.iloc[0])
 
     attackCreateExample = AttackCreate()
     # 完成数据的初始导入
+    # 数据的初始解码有问题的？我直接裂开了
     attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
     attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
 
-    # def insert_attack(self, id, normal_T, ratio, exist_time):
-    # 是否真实完成了注入攻击呢？这里可能需要耦合
-    # 为什么只存储了一个值呢？难以理解，一定是有一部分的算法出问题了
-    # 我真的是直接裂开了
+    # def insert_attack(self, id, normal_T, ratio, exist_time)
+    # attackCreateExample.insert_attack('82', 0.01, 2,0.2)
+    # def erase_attack(self, id, exist_time):
+    # attackCreateExample.erase_attack('82', 0.2)
+    # def reput_attack_SingleId(self, id, exist_time):
+    # attackCreateExample.reput_attack_SingleId("82", 0.2)
+    # 这种全体reput貌似需要一小段时间？为了时间对齐！
+    attackCreateExample.reput_attack_AllData(0.1)
+    attackCreateExample.get_rule(" ")
 
-    attackCreateExample.insert_attack("82", 0.001, 2, 2)
 

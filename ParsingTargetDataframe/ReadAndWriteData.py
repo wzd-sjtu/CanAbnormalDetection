@@ -161,6 +161,7 @@ def cutting_data_into_standard_style(file_name, file_type, output_file_name):  #
         times = times + 1
         if times % 3000 == 0:
             print(times)
+            break
         # 还是开多线程处理程序吧，提高效率？
 #for data_frame in data_frame_list:
  #   print(data_frame.type_name)
@@ -184,6 +185,7 @@ if __name__ == '__main__':
     t_cut3 = multiprocessing.Process(target=cutting_data_into_standard_style, args=("{LoggingBlock3}", "asc", "test3.csv"))
     t_cut4 = multiprocessing.Process(target=cutting_data_into_standard_style, args=("{LoggingBlock4}", "asc", "test4.csv"))
     # cutting_data_into_standard_style("{LoggingBlock1}", "asc", "test1.csv")
+    # 给我跑起来哦，多进程
     t_cut1.start()
     t_cut2.start()
     t_cut3.start()

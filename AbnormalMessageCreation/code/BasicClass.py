@@ -65,17 +65,42 @@ class AnomalyDetectionSystem:
 
 # 专门用于存储规则的类，数据域的内容
 class Rule:
+    can_id = None
     begin_loc = 0
     end_loc = 0
+    length = 0
     type_of_class = None
     range = []
     def __init__(self):
         return None
-    def init_single_rule(self, begin_loc, end_loc, type_of_class, range):
+    def init_single_rule(self, can_id, begin_loc, end_loc, length, type_of_class, range):
+        self.can_id = can_id
         self.begin_loc = begin_loc
         self.end_loc = end_loc
         self.type_of_class = type_of_class
+        # range总是固定的？
         self.range = range
+        self.length = length
+class RuleMap():
+    ruleMap = {}
+    # 每个Map下面存储一个对应的list，存的是Rule类
+    # 提供遍历以及搜索服务
+    def __init__(self):
+        return None
+    def insertRule(self, ruleSmall):
+        if ruleSmall.can_id in self.ruleMap:
+            self.ruleMap[ruleSmall.can_id].append(ruleSmall)
+        else:
+            self.ruleMap[ruleSmall.can_id] = []
+            self.ruleMap[ruleSmall.can_id].append(ruleSmall)
+        return
+    def getTargetCanIdRule(self, id):
+        return self.ruleMap[id]
+    # 就是简单的查看一下是否将所有的合法数据读入
+    def showAllRules(self):
+        for k, v in self.ruleMap.items():
+            print(k)
+            print(len(v))
 
 class DataFieldAttackType:
     None
