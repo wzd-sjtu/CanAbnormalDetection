@@ -602,9 +602,9 @@ class AttackCreate:
 
                 ruleSingle = final_rule_list[random_num]
 
-                random_begin_bit = ruleSingle.begin_loc
-                length_of_bit = ruleSingle.length
-                random_end_bit = ruleSingle.end_loc
+                random_begin_bit = int(ruleSingle.begin_loc)
+                length_of_bit = int(ruleSingle.length)
+                random_end_bit = int(ruleSingle.end_loc)
                 val_range = ruleSingle.range
 
                 # 接下来对传感器的change是严格的，在某种程度上是严格的
@@ -626,6 +626,8 @@ class AttackCreate:
 
                 target_binary_bit = list(target_binary_bit)
 
+                # 以下是攻击的核心内容，根据不同的type，制造不同类型的攻击
+                # 想要实现多态攻击，这里的粒度还暂时不够
                 if basicType == 2: # 不一定在传感器取值范围
                     for love in range(random_begin_bit, random_end_bit + 1):
                         if (random.random() > 0.5):

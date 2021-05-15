@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # 还有这个攻击的详细描述报告该怎样写呢？暂时是不清楚的
 
     # 从location直接获取数据即可
-    loadDataExample.readOriginData()
+    loadDataExample.readHadCutData()
     # print(loadDataExample.sourceDataSnippet.iloc[0])
 
     attackCreateExample = AttackCreate()
@@ -39,6 +39,6 @@ if __name__ == '__main__':
     valueAttackInfo = DataFieldAttackInformation()
     valueAttackInfo.attackChoseType = valueAttackInfo.sensorAttack
     valueAttackInfo.relatedThing = valueAttackInfo.max_value_attack
-    attackCreateExample.change_data_field(valueAttackInfo, '82', 0.02)
+    attackCreateExample.change_data_field(valueAttackInfo, '17D', 0.2)
 
 

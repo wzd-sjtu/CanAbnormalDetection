@@ -22,4 +22,9 @@ class LoadDataClass:
         self.historyNormalDataSnippet = pd.read_csv("../src/webOriginData/test2.csv", index_col=0)
                                                     # usecols=[0, 1, 2, 12, 13, 14, 15, 16])
     # 至此完成简单的数据初始化
+    def readHadCutData(self):
+        doc1Num = round(random.random()*175)
+        doc2Num = round(random.random()*175)
+        self.sourceDataSnippet = pd.read_csv("../src/HadCutData/" + str(doc1Num) + ".csv", index_col=0)
+        self.historyNormalDataSnippet = pd.read_csv("../src/HadCutData/" + str(doc2Num) + ".csv", index_col=0)
 
