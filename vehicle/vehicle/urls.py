@@ -33,5 +33,15 @@ urlpatterns = [
     path('detect/sequenceRelationship', views._detect_sequenceRelationship),
     path('detect/datafield', views._detect_datafield),
     path('detect/datafieldRelationship', views._detect_datafieldRalationship),
+
+    # 异常报文制造目录：这里的description文件是为了更好的可视化的
     path('construct/', views.construct),
+    path('construct/insert', views._construct_insert),
+    path('construct/erase', views._construct_erase),
+    path('construct/reput', views._construct_reput),
+    path('construct/changeDataField', views._construct_changeDataField),
+    path('construct/about', views._construct_about),
+    # 构建完成页面后，需要再实现一个展示系统，展示我们的攻击数据，并且为将来的操作打下基础
+    # 每次攻击后，生成的数据都应当只有一个文件吧？
+    path('process', views.process),
 ]

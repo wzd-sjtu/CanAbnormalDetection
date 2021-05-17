@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/"><strong>Home</strong></a></li>
+            <li><a href="/construct" style="color: #afd9ee"><strong>Construct</strong></a></li>
+            <li><a href="/construct/insert" style="color: #afd9ee"><strong>Insert Attack</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+<!-- 需要制造一个可以选择攻击的部分？ -->
+{% block construct_insert %}
+    <!-- 这里面是自己发挥的内容哦 -->
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+
+    <!-- 总而言之，想要好看，还是需要自己慢慢设计实现的 -->
+    <!-- 直接用模板总会出现意想不到的问题 -->
+
+    <!-- 算是自己实现了一个简陋的攻击生成页面，解决了一些必要的冲突 -->
+    <!-- form提交以后，我们需要更新网页，将攻击内容显示出来 -->
+    <form role="form">
+        <div class="form-group" id="insert id">
+        <!-- 之所以不显示，是因为这里的表单发生了冲突，并且冲突无法解决 -->
+        <label>选择注入的报文id</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;"
+                    id="chose_id">
+                    {% for item in targetChoics %}
+                        <option style="color:black">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label for="name">攻击持续时间（s）</label><br/>
+            <input type="text" id="attack_exist_time"
+                style="color:white;background-color: transparent;" >
+        </div>
+        <!-- 这里涉及到了攻击的注入，只要把这个写好，总是可以飞黄腾达的 -->
+        <br/>
+        <button type="submit" class="btn btn-default"
+            style="color:white;background-color: transparent;font-size:12px"
+                id="make_insert_attack">生成攻击</button>
+    </form>
+
+    <div class="container">
+          <ul class="list-group">
+                {% for item in Description %}
+                    <li class="list-group-item">{{ item }}</li>
+                {% endfor %}
+          </ul>
+    </div>
+
+
+    <!-- 以前的我是万万看不明白这个jquery ajax的写法的，现在水平确实比以前要高不少了 -->
+    <script>
+        $(function() {
+            $("#make_insert_attack").click(function() {
+                var formdata = new FormData();
+                formdata.append("chose_id", $("#chose_id").val());
+                formdata.append("attack_exist_time", $("#attack_exist_time").val());
+
+                $.ajax({
+                    url:"/process",
+                    type:"post",
+                    data:formdata,
+                    contentType:false,
+                    processData:false,
+                    success:function (data) {
+                        alert("成功生成注入攻击！");
+                        // 在这里，data就是得到的新的数据，专门用于ajax请求后得到的数据哦
+                        console.log(data);
+                    }
+                })
+            })
+        })
+    </script>
+
+{% endblock %}
