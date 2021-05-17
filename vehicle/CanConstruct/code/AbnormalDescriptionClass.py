@@ -43,7 +43,7 @@ class AbnormalDescriptionClass:
         self.dataFrameList = self.dataFrameList.append(dataSmallFrame)
         # 这里只是单纯的写出文件而已
     def writeIntoCsv(self):
-        self.dataFrameList.to_csv('../src/attackDescription/myDescription.csv')
+        self.dataFrameList.to_csv('./CanConstruct/src/attackDescription/myDescription.csv')
         self.dataFrameList = None
         # 当写完以后，记得置空，从而为内存空间打下基础
         self.dataFrameList = pd.DataFrame(columns=['time', 'can_id', 'attackType', 'description', 'data_in_binary'])

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import os
 import sys
 from . import generalModels as gm
@@ -85,6 +85,7 @@ def _detect_datafieldRalationship(request):
 def construct(request):
 
     # 数据导入，为接下来的攻击打下基础
+    # 这里就不初始化数据了，防止出问题喽
     loadDataExample = LoadDataClass()
     loadDataExample.readHadCutData()
     attackCreateExample = AttackCreate()
@@ -110,18 +111,36 @@ def process(request):
         chose_attack_exist_time = request.POST.get('attack_exist_time')
         print(chose_attack_exist_time)
         print(chose_id)
+
+        # 数据需要重新导入？我真的是醉了
+        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+
+        loadDataExample = LoadDataClass()
+        loadDataExample.readHadCutData()
+        attackCreateExample = AttackCreate()
+        attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
+        attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
+
         attackCreateExample.erase_attack(str(chose_id), float(chose_attack_exist_time))
         tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
-        target_list = []
-        for i in range(0, tmp.shape[0]):
+        target_dict = {}
+        num = tmp.shape[0]
+        target_dict['size'] = str(num)
+        # 不妨存储为一个小小的字典哦
+        for i in range(0, num):
             desc = "time is "
-            desc = desc + tmp.iloc[i]['time']
+            desc = desc + str(tmp.iloc[i]['time'])
             desc = desc + " id is "
-            desc = desc + tmp.iloc[i]['can_id']
-            desc = desc + "  " + tmp.iloc[i]['description']
-            target_list.append(desc)
-        return render(request, 'construct/construct_insert.html', {'targetChoics': allCanIdList, 'Description':target_list})
+            desc = desc + str(tmp.iloc[i]['can_id'])
+            desc = desc + "  " + str(tmp.iloc[i]['description'])
+            target_dict[str(i)] = desc
+        response = JsonResponse(target_dict)
 
+        return response
+
+    # 以下才是较为标准的写法，这点谨记
+    #response = JsonResponse({"status": '服务器接收成功', 'data': data, 'list': list})
+    #return response
 def _construct_erase(request):
     return render(request, 'construct/construct_erase.html')
 def _construct_reput(request):
