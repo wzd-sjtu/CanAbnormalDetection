@@ -182,8 +182,8 @@ def erase_attack(request):
             target_dict[can_id_loc] = tmp.iloc[i]['can_id']
             data_loc = "data_in_hex" + str(i)
             target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
-            description_loc = "erase_attack"
-            target_dict[description_loc] = "erase attack"
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = tmp.iloc[i]['description']
 
         response = JsonResponse(target_dict)
 
@@ -272,19 +272,19 @@ def reput_attack(request):
 def _construct_changeDataField(request):
     return render(request, 'construct/construct_changeDataField.html', {'targetChoics': allCanIdList})
 def changeDataField_attack(request):
+    '''
+    formdata.append("chose_id", $("#chose_id").val());
+    formdata.append("attack_exist_time", $("#attack_exist_time").val());
+    formdata.append("chose_attack_method", $("#chose_attack_method").val());
+    formdata.append("sensor_attack_type", $("#sensor_attack_type").val());
+    '''
     if request.is_ajax():
         print(request.POST)
-        # formdata.append("chose_id", $("#chose_id").val());
-        # formdata.append("attack_exist_time", $("#attack_exist_time").val());
 
-        # 实际上，这里的js是存在很大的问题的？感觉稍微有点裂开？
         chose_id = request.POST.get('chose_id')
         chose_attack_exist_time = request.POST.get('attack_exist_time')
-        print(chose_attack_exist_time)
-        print(chose_id)
-
-        # 数据需要重新导入？我真的是醉了
-        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+        chose_attack_method = request.POST.get('chose_attack_method')
+        chose_sensor_attack_type = request.POST.get('sensor_attack_type')
 
         loadDataExample = LoadDataClass()
         loadDataExample.readHadCutData()
@@ -292,7 +292,25 @@ def changeDataField_attack(request):
         attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
         attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
 
-        attackCreateExample.erase_attack(str(chose_id), float(chose_attack_exist_time))
+        if chose_attack_method == "RanDom":
+            attackCreateExample.changedatafield_attack_randomly(str(chose_id), float(chose_attack_exist_time))
+        elif chose_attack_method == "ConstOrMultivalue":
+            attackCreateExample.changedatafield_attack_const_or_multivalue(str(chose_id), float(chose_attack_exist_time))
+        elif chose_attack_method == "Sensor":
+            tyty = 0
+            if chose_sensor_attack_type == "max-value":
+                tyty = 0
+            elif chose_sensor_attack_type == "min-value":
+                tyty = 1
+            elif chose_sensor_attack_type == "random-value":
+                tyty = 2
+            elif chose_sensor_attack_type == "advanced-attack":
+                tyty = 3
+            attackCreateExample.changedatafield_attack_sensro(str(chose_id), float(chose_attack_exist_time), tyty)
+
+        # 数据需要重新导入？我真的是醉了
+        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+        # 制造完攻击后，将内容log直接提取出来即可
         tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
 
         target_dict = {}
@@ -306,8 +324,8 @@ def changeDataField_attack(request):
             target_dict[can_id_loc] = tmp.iloc[i]['can_id']
             data_loc = "data_in_hex" + str(i)
             target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
-            description_loc = "erase_attack"
-            target_dict[description_loc] = "erase attack"
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = tmp.iloc[i]['description']
 
         response = JsonResponse(target_dict)
 

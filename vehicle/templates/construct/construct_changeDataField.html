@@ -8,7 +8,7 @@
         <ol class="breadcrumb" style="background-color: transparent;text-align: center;">
             <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
             <li><a href="/construct" style="color: #afd9ee"><strong>Construct</strong></a></li>
-            <li><a href="/construct/insert" style="color: #afd9ee"><strong>Insert Attack</strong></a></li>
+            <li><a href="/construct/changeDataField" style="color: #afd9ee"><strong>changeDataField Attack</strong></a></li>
         </ol>
       </div>
 {% endblock %}
@@ -26,8 +26,23 @@
     <!-- 我裂开，为什么jquery无法使用呢？貌似存在冲突？ -->
     <form role="form" style="text-align: center">
         {% csrf_token %}
+        <!-- 这里的诸多攻击方式，应当如何快速处理呢？ -->
         <div class="form-group" id="insert id" >
         <!-- 之所以不显示，是因为这里的表单发生了冲突，并且冲突无法解决 -->
+        <label>请选择想要的攻击方式</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="chose_attack_method">
+                    <option style="color:black">RanDom</option>
+                    <option style="color:black">ConstOrMultivalue</option>
+                    <option style="color:black">Sensor</option>
+                </select>
+            </label>
+        </div>
+
+    <div class="form-group" id="insert id" >
         <label>选择注入的报文id</label>
             <br/>
                 <label>
@@ -37,6 +52,21 @@
                     {% for item in targetChoics %}
                         <option style="color:black">{{ item }}</option>
                     {% endfor %}
+                </select>
+            </label>
+    </div>
+    <div class="form-group" id="insert id" >
+        <label>如果想要攻击传感器字段，请指定类型</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="sensor_attack_type">
+                    <option style="color:black">not chosen</option>
+                    <option style="color:black">max-value</option>
+                    <option style="color:black">min-value</option>
+                    <option style="color:black">random-value</option>
+                    <option style="color:black">advanced-attack</option>
                 </select>
             </label>
         </div>
@@ -58,6 +88,7 @@
     </form>
 
     <div class="container">
+        <!-- 异常数据的显示还是以前的那一套流程，就直接显示在表格里面喽 -->
       <h2>异常数据展示</h2>
       <p></p>
       <table class="table" id="attack_description_div">
@@ -89,15 +120,19 @@
         $(function() {
             $("#make_insert_attack").click(function() {
                 var formdata = new FormData();
+                // 获取提交的所有表单？
                 formdata.append("chose_id", $("#chose_id").val());
                 formdata.append("attack_exist_time", $("#attack_exist_time").val());
+                formdata.append("chose_attack_method", $("#chose_attack_method").val());
+                formdata.append("sensor_attack_type", $("#sensor_attack_type").val());
+
                 var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
                 formdata.append("csrfmiddlewaretoken", token_of_csrf);
                 // 发现是undefined的，需要找到对应的真实内容？
                 // console.log(token_of_csrf);
                 // 总算是把数据成功发送过去了，我真的是醉了哦
                 $.ajax({
-                    url:"/process",
+                    url:"/changeDataField_attack",
                     headers: {
                         "X-CSRFToken":token_of_csrf
                     },
@@ -118,7 +153,7 @@
                             var time_loc = "time" + i;
                             var can_id_loc = "can_id" + i;
                             var data_loc = "data_in_hex" + i;
-                            var description_loc = "erase_attack";
+                            var description_loc = "description" + i;
 
                             var tbody = "<tbody style=\"color:greenyellow\"><tr>";
                             var tmp = "";

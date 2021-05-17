@@ -572,7 +572,9 @@ class AttackCreate:
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
         self.descriptionStruct.writeIntoCsv()
 
-
+    # 这里basicType接口并没有完全定义？
+    # 设置很多图片是否有意义呢？没有意义
+    # 直接选择上下左右定位是比较好的
     def changedatafield_attack_sensro(self, id, exist_time, basicType):
         # 不知道传感器的攻击可以选择到什么粒度，也不知道究竟可以制造哪种类型的攻击呢？
         # 这几者都是暂时未知的
@@ -689,4 +691,6 @@ class AttackCreate:
 
     # 至此，应当是完成了这个基本类的编写
     # 后面需要把这个数据结构部署到网页上去，从而为将来的展示打下较好的基础
+
+    # 幸亏进行了类的封装，否则后期绝对会出问题
 
