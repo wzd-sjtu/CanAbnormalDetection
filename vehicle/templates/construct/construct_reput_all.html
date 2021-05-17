@@ -8,12 +8,15 @@
         <ol class="breadcrumb" style="background-color: transparent;text-align: center;">
             <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
             <li><a href="/construct" style="color: #afd9ee"><strong>Construct</strong></a></li>
-            <li><a href="/construct/insert" style="color: #afd9ee"><strong>Insert Attack</strong></a></li>
+            <li><a href="/construct/reput" style="color: #afd9ee"><strong>Reput Attack</strong></a></li>
+            <!-- 这里的href居然有可能写反？这种错误是真的弱智哦 -->
+            <li><a href="/construct/construct_reput_all" style="color: #afd9ee"><strong>Reput Attack All</strong></a></li>
+
         </ol>
       </div>
 {% endblock %}
 <!-- 需要制造一个可以选择攻击的部分？ -->
-{% block construct_insert %}
+{% block construct_reput %}
     <!-- 这里面是自己发挥的内容哦 -->
     <!-- 新 Bootstrap 核心 CSS 文件 -->
 
@@ -26,32 +29,10 @@
     <!-- 我裂开，为什么jquery无法使用呢？貌似存在冲突？ -->
     <form role="form" style="text-align: center">
         {% csrf_token %}
-        <div class="form-group" id="insert id" >
-        <!-- 之所以不显示，是因为这里的表单发生了冲突，并且冲突无法解决 -->
-        <label>选择注入的报文id</label>
-            <br/>
-                <label>
-                <select style="color:white;background-color: transparent;size:300px;height: 50px;
-                                border-color: greenyellow;border-radius: 10px;text-align: center;"
-                    id="chose_id">
-                    {% for item in targetChoics %}
-                        <option style="color:black">{{ item }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-        </div>
 
         <div class="form-group">
             <label for="name">攻击持续时间（s）</label><br/>
             <input  id="attack_exist_time" style="color:white;
-                        background-color: transparent;size:100px;height: 50px;
-                                border-color: greenyellow;border-radius: 10px;
-                        text-align: center;">
-        </div>
-
-        <div class="form-group">
-            <label for="name">注入报文的周期（s）</label><br/>
-            <input  id="attack_cycle_time" style="color:white;
                         background-color: transparent;size:100px;height: 50px;
                                 border-color: greenyellow;border-radius: 10px;
                         text-align: center;">
@@ -99,14 +80,13 @@
                 var formdata = new FormData();
                 formdata.append("chose_id", $("#chose_id").val());
                 formdata.append("attack_exist_time", $("#attack_exist_time").val());
-                formdata.append("attack_cycle_time", $("#attack_cycle_time").val());
                 var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
                 formdata.append("csrfmiddlewaretoken", token_of_csrf);
                 // 发现是undefined的，需要找到对应的真实内容？
                 // console.log(token_of_csrf);
                 // 总算是把数据成功发送过去了，我真的是醉了哦
                 $.ajax({
-                    url:"/insert_attack",
+                    url:"/reput_attack",
                     headers: {
                         "X-CSRFToken":token_of_csrf
                     },

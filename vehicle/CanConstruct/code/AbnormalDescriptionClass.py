@@ -1,5 +1,6 @@
 import pandas as pd
-
+import CodingTypeChange
+from CodingTypeChange import binary_str_to_hex_str
 # 这个类用于输出需要的异常信息
 class AbnormalDescriptionClass:
 
@@ -7,7 +8,7 @@ class AbnormalDescriptionClass:
     # 这里可能需要导入周期信息，从而提高可用性？
     # 0即为正常数据，这点注意
     # attackType使用字母+数字动态组合即可
-    dataFrameList = pd.DataFrame(columns = ['time', 'can_id', 'attackType', 'description', 'data_in_binary'])
+    dataFrameList = pd.DataFrame(columns = ['time', 'can_id', 'attackType', 'description', 'data_in_binary', 'data_in_hex'])
 
     dictAttackStrToNum = {"insert attack":1, "erase attack":2, "reput attack":3, "changedatafield attack":4}
     dictNumToAttack = {1:"insert attack", 2:"erase attack", 3:"reput attack", 4:"changedatafield attack"}
@@ -37,6 +38,7 @@ class AbnormalDescriptionClass:
         dict_tmp['can_id'] = self.attackCanId
         dict_tmp['attackType'] = self.attackType
         dict_tmp['description'] = self.attackDescription
+        dict_tmp['data_in_hex'] = binary_str_to_hex_str(self.attackData)
         dict_tmp['data_in_binary'] = self.attackData
 
         dataSmallFrame = pd.DataFrame([dict_tmp])
@@ -46,4 +48,4 @@ class AbnormalDescriptionClass:
         self.dataFrameList.to_csv('./CanConstruct/src/attackDescription/myDescription.csv')
         self.dataFrameList = None
         # 当写完以后，记得置空，从而为内存空间打下基础
-        self.dataFrameList = pd.DataFrame(columns=['time', 'can_id', 'attackType', 'description', 'data_in_binary'])
+        self.dataFrameList = pd.DataFrame(columns=['time', 'can_id', 'attackType', 'description', 'data_in_binary', 'data_in_hex'])

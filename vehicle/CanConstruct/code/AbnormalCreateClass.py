@@ -180,7 +180,6 @@ class AttackCreate:
     # 指定id重放 SingleId
     # 指定全体数据重放 AllData
 
-
     def reput_attack_SingleId(self, id, exist_time):
         # 报文id就是想要重放的id序列信息
         document_name = "reput_attack_SingleId_test.csv"
@@ -363,6 +362,8 @@ class AttackCreate:
     # 以上的所有代码都不涉及复杂的修改
 
     # get_rule 是已经测试过的函数
+    # 首先要给出一个规则的展示表格？用什么实现呢？暂时是未知的
+
     def get_rule(self, doc_path):
         dfRule = pd.read_csv(self.ruleLocation)
 
@@ -379,6 +380,8 @@ class AttackCreate:
     # 数据域字段修改攻击，假设得到了某些邪恶的规则字段
     # 这里是经典的数据域修改攻击，这里的索引是what situation呢？
     # 暂时不太清楚数据域修改攻击应当如何实现呢？
+
+    # 数据域攻击的修改是博大精深的，可以做的简单一点，也可以做的复杂一些？
     def changedatafield_attack(self, id, attackType, exist_time):
         # 这种数据域攻击主要有两种：
         # 一种是使用将某个字段设置为最大or最小常量

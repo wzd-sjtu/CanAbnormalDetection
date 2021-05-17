@@ -96,11 +96,58 @@ def construct(request):
 
     return render(request, 'construct/construct.html')
 
-# 以下是报文的攻击页面？需要根据不同的点击，返回不同的信息？
+# 报文网页可以一点点写，提高efficiency
 def _construct_insert(request):
     # 传回了一个参数字典，我们需要设置下拉框选项
     return render(request, 'construct/construct_insert.html', {'targetChoics': allCanIdList})
-def process(request):
+def insert_attack(request):
+    if request.is_ajax():
+        print(request.POST)
+        # formdata.append("chose_id", $("#chose_id").val());
+        # formdata.append("attack_exist_time", $("#attack_exist_time").val());
+
+        # 实际上，这里的js是存在很大的问题的？感觉稍微有点裂开？
+        chose_id = request.POST.get('chose_id')
+        chose_attack_exist_time = request.POST.get('attack_exist_time')
+        chose_attack_cycle_time = request.POST.get('attack_cycle_time')
+
+        # 数据需要重新导入？我真的是醉了
+        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+
+        loadDataExample = LoadDataClass()
+        loadDataExample.readHadCutData()
+        attackCreateExample = AttackCreate()
+        attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
+        attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
+
+        # def insert_attack(self, id, normal_T, ratio, exist_time):
+        attackCreateExample.insert_attack(str(chose_id), float(chose_attack_cycle_time), 1, float(chose_attack_exist_time))
+        tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
+        # 获得log信息，是可信的
+        target_dict = {}
+        num = tmp.shape[0]
+        target_dict['size'] = str(num)
+        # 不妨存储为一个小小的字典哦
+        for i in range(0, num):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = tmp.iloc[i]['time']
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            data_loc = "data_in_hex" + str(i)
+            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            description_loc = "erase_attack"
+            target_dict[description_loc] = "insert attack"
+
+        response = JsonResponse(target_dict)
+
+        return response
+    # 以下才是较为标准的写法，这点谨记
+    #response = JsonResponse({"status": '服务器接收成功', 'data': data, 'list': list})
+    #return response
+
+def _construct_erase(request):
+    return render(request, 'construct/construct_erase.html', {'targetChoics': allCanIdList})
+def erase_attack(request):
     if request.is_ajax():
         print(request.POST)
         # formdata.append("chose_id", $("#chose_id").val());
@@ -123,30 +170,152 @@ def process(request):
 
         attackCreateExample.erase_attack(str(chose_id), float(chose_attack_exist_time))
         tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
+
         target_dict = {}
         num = tmp.shape[0]
         target_dict['size'] = str(num)
         # 不妨存储为一个小小的字典哦
         for i in range(0, num):
-            desc = "time is "
-            desc = desc + str(tmp.iloc[i]['time'])
-            desc = desc + " id is "
-            desc = desc + str(tmp.iloc[i]['can_id'])
-            desc = desc + "  " + str(tmp.iloc[i]['description'])
-            target_dict[str(i)] = desc
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = tmp.iloc[i]['time']
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            data_loc = "data_in_hex" + str(i)
+            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            description_loc = "erase_attack"
+            target_dict[description_loc] = "erase attack"
+
         response = JsonResponse(target_dict)
 
         return response
 
+def _construct_reput(request):
+    return render(request, 'construct/construct_reput.html', {'targetChoics': allCanIdList})
+def _construct_reput_single(request):
+    return render(request, 'construct/construct_reput_single.html', {'targetChoics': allCanIdList})
+def _construct_reput_all(request):
+    return render(request, 'construct/construct_reput_all.html', {'targetChoics': allCanIdList})
+# 一般来说，重放攻击的代码量是比较小的，远远没有现在这么大的
+# 这里写的可视化过程是非常复杂的，某种程度上来说，是难以理解的
+def reput_attack(request):
+    if request.is_ajax():
+        print(request.POST)
+        # formdata.append("chose_id", $("#chose_id").val());
+        # formdata.append("attack_exist_time", $("#attack_exist_time").val());
+
+        # 实际上，这里的js是存在很大的问题的？感觉稍微有点裂开？
+        chose_id = request.POST.get('chose_id')
+        chose_attack_exist_time = request.POST.get('attack_exist_time')
+        if chose_id == 'undefined':
+            # 调用别的手段即可，根据参数做出不同选择
+            # chose_id需要给出参数？
+
+            loadDataExample = LoadDataClass()
+            loadDataExample.readHadCutData()
+            attackCreateExample = AttackCreate()
+            attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
+            attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
+
+            attackCreateExample.reput_attack_AllData(float(chose_attack_exist_time))
+            tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
+
+            target_dict = {}
+            num = tmp.shape[0]
+            target_dict['size'] = str(num)
+            # 不妨存储为一个小小的字典哦
+            for i in range(0, num):
+                time_loc = "time" + str(i)
+                target_dict[time_loc] = tmp.iloc[i]['time']
+                can_id_loc = "can_id" + str(i)
+                target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+                data_loc = "data_in_hex" + str(i)
+                target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+                description_loc = "erase_attack"
+                target_dict[description_loc] = "reput attack"
+
+            response = JsonResponse(target_dict)
+
+            return response
+        # 数据需要重新导入？我真的是醉了
+        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+        else:
+            loadDataExample = LoadDataClass()
+            loadDataExample.readHadCutData()
+            attackCreateExample = AttackCreate()
+            attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
+            attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
+
+            attackCreateExample.reput_attack_SingleId(str(chose_id), float(chose_attack_exist_time))
+            tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
+
+            target_dict = {}
+            num = tmp.shape[0]
+            target_dict['size'] = str(num)
+            # 不妨存储为一个小小的字典哦
+            for i in range(0, num):
+                time_loc = "time" + str(i)
+                target_dict[time_loc] = tmp.iloc[i]['time']
+                can_id_loc = "can_id" + str(i)
+                target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+                data_loc = "data_in_hex" + str(i)
+                target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+                description_loc = "erase_attack"
+                target_dict[description_loc] = "reput attack"
+
+            response = JsonResponse(target_dict)
+
+            return response
     # 以下才是较为标准的写法，这点谨记
     #response = JsonResponse({"status": '服务器接收成功', 'data': data, 'list': list})
     #return response
-def _construct_erase(request):
-    return render(request, 'construct/construct_erase.html')
-def _construct_reput(request):
-    return render(request, 'construct/construct_reput.html')
+
 def _construct_changeDataField(request):
-    return render(request, 'construct/construct_changeDataField.html')
+    return render(request, 'construct/construct_changeDataField.html', {'targetChoics': allCanIdList})
+def changeDataField_attack(request):
+    if request.is_ajax():
+        print(request.POST)
+        # formdata.append("chose_id", $("#chose_id").val());
+        # formdata.append("attack_exist_time", $("#attack_exist_time").val());
+
+        # 实际上，这里的js是存在很大的问题的？感觉稍微有点裂开？
+        chose_id = request.POST.get('chose_id')
+        chose_attack_exist_time = request.POST.get('attack_exist_time')
+        print(chose_attack_exist_time)
+        print(chose_id)
+
+        # 数据需要重新导入？我真的是醉了
+        # 这种时候，最好再开一个进程进行处理，这样算是比较稳妥的
+
+        loadDataExample = LoadDataClass()
+        loadDataExample.readHadCutData()
+        attackCreateExample = AttackCreate()
+        attackCreateExample.sourceDataSnippet = loadDataExample.sourceDataSnippet
+        attackCreateExample.historyNormalDataSnippet = loadDataExample.historyNormalDataSnippet
+
+        attackCreateExample.erase_attack(str(chose_id), float(chose_attack_exist_time))
+        tmp = pd.read_csv('./CanConstruct/src/attackDescription/myDescription.csv')
+
+        target_dict = {}
+        num = tmp.shape[0]
+        target_dict['size'] = str(num)
+        # 不妨存储为一个小小的字典哦
+        for i in range(0, num):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = tmp.iloc[i]['time']
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            data_loc = "data_in_hex" + str(i)
+            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            description_loc = "erase_attack"
+            target_dict[description_loc] = "erase attack"
+
+        response = JsonResponse(target_dict)
+
+        return response
+    # 以下才是较为标准的写法，这点谨记
+    #response = JsonResponse({"status": '服务器接收成功', 'data': data, 'list': list})
+    #return response
+
 def _construct_about(request):
     return render(request, 'construct/construct_about.html')
 
