@@ -40,6 +40,8 @@ class AttackCreate:
     # 专门用于存放目标地址信息
     store_place = "./CanConstruct/src/attack_test"
 
+    # 需要每一次生成的文件名字都相同，存在覆盖原理
+    document_name = "attack_data.csv"
 
     def __init__(self):
         self.origin_place = None
@@ -67,7 +69,7 @@ class AttackCreate:
 
         # 在这里需要进行注入攻击
         # 这种攻击输出的文件名字前缀
-        document_name = "insert_attack_test.csv"
+        self.document_name = "attack_data.csv"
 
         begin_time = random.random()
         # 这里的origindata存的是dataframe，我真是醉了
@@ -105,7 +107,7 @@ class AttackCreate:
                 df3['can_id'] = id
                 df3['anormal'] = 1 # 证明是注入数据类型
                 # 这里是注入攻击
-                descriptionTmp = "insert attack!"
+                descriptionTmp = "This message is an insert attaction!"
 
                 # def updateBasicInformation(self, type, id, time, description, data_in_binary):
                 self.descriptionStruct.updateBasicInformation(1, df3['can_id'],
@@ -126,7 +128,8 @@ class AttackCreate:
         # 攻击报文存储
         # 我裂开，这些文件路径都要进行修改，真的醉了
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num)+".csv"
+        # 统一异常报文数据？对的
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
@@ -136,7 +139,7 @@ class AttackCreate:
     # 删除攻击，在某一个时间段，去掉某个id的所有报文
     def erase_attack(self, id, exist_time):
         # 删除攻击的手段还是比较easy的，可以以较快的速度完成删除攻击
-        document_name = "erase_attack_test.csv"
+        # document_name = "erase_attack_test.csv" 不需要再声明了
         # 在这里需要设定一系列参数的
         begin_time = random.random()
         # 这里标记的是begin的行
@@ -159,7 +162,7 @@ class AttackCreate:
 
                     df3 = tmp_origin_data.iloc[i]
                     # 这里是删除攻击
-                    descriptionTmp = "erase attack erase packet id is " + df3['can_id']
+                    descriptionTmp = "can id is " + df3['can_id'] +" It is erased!"
                     # 2代表删除攻击
                     # def updateBasicInformation(self, type, id, time, description, data_in_binary):
                     self.descriptionStruct.updateBasicInformation(2, df3['can_id'],
@@ -169,7 +172,8 @@ class AttackCreate:
                     tmp_origin_data = df1.append(df2)
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
 
@@ -182,7 +186,7 @@ class AttackCreate:
 
     def reput_attack_SingleId(self, id, exist_time):
         # 报文id就是想要重放的id序列信息
-        document_name = "reput_attack_SingleId_test.csv"
+        # document_name = "reput_attack_SingleId_test.csv"
 
         # 重放在0.2s内的数据
         # exist_time = 0.5 # 重放在0.5s内的所有数据
@@ -227,11 +231,14 @@ class AttackCreate:
             if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time:
                 if tmp_origin_data.iloc[i]['can_id'] == id and list_loc < len(reput_packet_data_in_hex):
 
+                    descriptionTmp = "id is " + id + " pre data is " + tmp_origin_data.loc[i,'data_in_hex']
+
                     tmp_origin_data.loc[i,'data_in_hex'] = reput_packet_data_in_hex[list_loc]
                     tmp_origin_data.loc[i, 'data_in_binary'] = reput_packet_data_in_binary[list_loc]
                     tmp_origin_data.loc[i, 'anormal'] = 3
                     df3 = tmp_origin_data.iloc[i]
-                    descriptionTmp = "This data is reput, can you find it? There is no more information"
+
+                    descriptionTmp = descriptionTmp + " now data is " + tmp_origin_data.loc[i,'data_in_hex']
                     self.descriptionStruct.updateBasicInformation(3, df3['can_id'],
                                                                   df3['time'],
                                                                   descriptionTmp,
@@ -240,7 +247,10 @@ class AttackCreate:
                     list_loc = list_loc + 1
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = self.document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+
+        # 文件存储的逻辑logic
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
 
@@ -253,7 +263,7 @@ class AttackCreate:
 
         # 问题本质是切片是否能修改的问题，现在的首要问题是加载数据格式不正确的问题
 
-        document_name = "reput_attack_AllData_test.csv"
+        # document_name = "reput_attack_AllData_test.csv"
 
         # 这里reputList是全体想要reput的数据
         reputList = None
@@ -270,6 +280,7 @@ class AttackCreate:
         pre_begin_loc_of_data = 0
         pre_end_loc_of_data = 0
 
+        # 这里的重放是一大块直接重放？
         for i in range(0, self.historyNormalDataSnippet.shape[0]):
             # 进行按行访问
             if tmp_origin_data.iloc[i]['time'] >= begin_time and tmp_origin_data.iloc[i]['time'] <= end_time:
@@ -330,6 +341,9 @@ class AttackCreate:
 
         time_diff = tmp_origin_data.iloc[pre_begin_loc_of_data]['time'] - tmp_origin_data_next.iloc[begin_loc_of_data]['time']
         print(time_diff)
+
+        length_of_reput = pre_begin_loc_of_data - begin_loc_of_data
+
         for love in range(pre_begin_loc_of_data, pre_end_loc_of_data):
             # 这个才是dataframe的最终精髓
             # 只能用loc进行索引定位？iloc返回的总是切片
@@ -337,7 +351,17 @@ class AttackCreate:
             tmp_origin_data.loc[love, 'anormal'] = 4
             # 在这里就记得记录存在小问题的信息
             df3 = tmp_origin_data.iloc[love]
-            descriptionTmp = "This data is reput, can you find it? There is no more information"
+            # 把这里的数据要存储回去的？
+            descriptionTmp = "this data is the reput data"
+            self.descriptionStruct.updateBasicInformation(4, df3['can_id'],
+                                                          df3['time'],
+                                                          descriptionTmp,
+                                                          df3['data_in_binary'])
+
+            loc1 = love - length_of_reput
+
+            df3 = tmp_origin_data_next.iloc[loc1]
+            descriptionTmp = "this data is the origin data"
             self.descriptionStruct.updateBasicInformation(4, df3['can_id'],
                                                           df3['time'],
                                                           descriptionTmp,
@@ -351,12 +375,15 @@ class AttackCreate:
 
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # 最后数据统一存储即可
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
 
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
         self.descriptionStruct.writeIntoCsv()
+
         return None
 
     # 以上的所有代码都不涉及复杂的修改
@@ -381,7 +408,8 @@ class AttackCreate:
     # 这里是经典的数据域修改攻击，这里的索引是what situation呢？
     # 暂时不太清楚数据域修改攻击应当如何实现呢？
 
-    # 数据域攻击的修改是博大精深的，可以做的简单一点，也可以做的复杂一些？
+    # 数据域攻击的修改是博大精深的，可以做的简单一点，也可以做的复杂一些
+    # 以下这个函数暂时先废弃
     def changedatafield_attack(self, id, attackType, exist_time):
         # 这种数据域攻击主要有两种：
         # 一种是使用将某个字段设置为最大or最小常量
@@ -409,7 +437,7 @@ class AttackCreate:
         sensor_attack: max-value, min-value, any-value
         '''
         # 这里是统一的文件输入位置，可以考虑加一个函数load
-        document_name = "changedatafield_attack_test.csv"
+        # document_name = "changedatafield_attack_test.csv"
         # 在这里需要设定一系列参数的
         # exist_time = 0.5  # 修改在0.5s内的所有数据
 
@@ -436,7 +464,8 @@ class AttackCreate:
 
         # 下面的存储操作是完全类似的，是可以封装为函数的部分
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
@@ -446,7 +475,8 @@ class AttackCreate:
     def changedatafield_attack_randomly(self, id, exist_time):
         # attackType就是 case switch的根本决定因素
         self.get_rule(" ")
-        document_name = "changedatafield_attack_test.csv"
+        # document_name = "changedatafield_attack_test.csv"
+
         # 从源数据中提取重放数据
         begin_time = random.random()
         begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
@@ -488,7 +518,8 @@ class AttackCreate:
                                                               df3['data_in_binary'])
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
@@ -498,7 +529,7 @@ class AttackCreate:
     def changedatafield_attack_const_or_multivalue(self, id, exist_time):
         # 这二者的名字是一样的？但是攻击类型是否需要相同呢？暂时是未知的
         self.get_rule(" ")
-        document_name = "changedatafield_attack_test.csv"
+        # document_name = "changedatafield_attack_test.csv"
         # 从源数据中提取重放数据
         begin_time = random.random()
         begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
@@ -520,7 +551,7 @@ class AttackCreate:
                     and tmp_origin_data.iloc[i]['can_id'] == id:
                 # 正式进入random环节
                 # 从前半部分直接random到后半部分
-                print("successfully")
+                # print("successfully")
 
                 random_num = round(random.random()*(len(final_rule_list)-1)) # 取到这个值即可
 
@@ -566,7 +597,9 @@ class AttackCreate:
                                                               df3['data_in_binary'])
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
@@ -581,7 +614,7 @@ class AttackCreate:
         # 实际上，sensor的修改尺度是由attackType决定的，这是一个复杂的攻击配置变量
         # 这二者的名字是一样的？但是攻击类型是否需要相同呢？暂时是未知的
         self.get_rule(" ")
-        document_name = "changedatafield_attack_test.csv"
+        # document_name = "changedatafield_attack_test.csv"
         # 从源数据中提取重放数据
         begin_time = random.random()
         begin_time = self.sourceDataSnippet.shape[0] * (2 / 3) * begin_time
@@ -649,6 +682,7 @@ class AttackCreate:
 
 
                 target_binary_bit = "".join(target_binary_bit)
+
                 descriptionTmp = descriptionTmp + " end binary is " + target_binary_bit[
                                                                       random_begin_bit:random_end_bit + 1]
                 tmp_origin_data.loc[i, 'data_in_binary'] = target_binary_bit
@@ -666,13 +700,14 @@ class AttackCreate:
                                                               df3['data_in_binary'])
 
         self.store_place = "./CanConstruct/src/attack_test"
-        document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        # document_name = document_name + str(begin_time) + "_" + str(self.input_num) + ".csv"
+        document_name = self.document_name
         if not os.path.exists(self.store_place):
             os.mkdir(self.store_place)
         tmp_origin_data.to_csv(self.store_place + "/" + document_name)
         self.descriptionStruct.writeIntoCsv()
 
-
+        # 至此完成了各种类之间的耦合操作，还是合理的哦
         return
 
     # 到现在为止，一共造出了7种攻击，以及很多需要配置的参数

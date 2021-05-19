@@ -33,6 +33,7 @@ class AbnormalDescriptionClass:
         return
     def writeIntoInnerStruct(self):
         # 目标是返回一个dataframe，这个算是最重要的目标喽
+        # description其实是需要添加的数据？
         dict_tmp = {}
         dict_tmp['time'] = self.attackTime
         dict_tmp['can_id'] = self.attackCanId
