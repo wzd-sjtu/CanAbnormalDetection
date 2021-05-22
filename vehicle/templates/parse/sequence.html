@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+    <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/"><strong>Home</strong></a></li>
+            <li><a href="/parse"><strong>Parse</strong></a></li>
+            <li><a href="/parse/sequence" style="color: #afd9ee"><strong>Sequence</strong></a></li>
+        </ol>
+    </div>
+{% endblock %}
+{% block parse_sequence %}
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>Statistic features of ID in sequence</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                </div>
+            </div>
+            <div style="text-align: center">
+                <h1>Survival rate of IDin sequence</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                </div>
+            </div>
+            <div style="text-align: center">
+                <h1>Cosine Similarity of sub sequences</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                </div>
+            </div>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Parse";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Parse";
+    </script>
+{% endblock %}

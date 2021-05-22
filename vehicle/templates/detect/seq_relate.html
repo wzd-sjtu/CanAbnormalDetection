@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/"><strong>Home</strong></a></li>
+            <li><a href="/detect"><strong>Detect</strong></a></li>
+            <li><a href="/detect/sequenceRelationship" style="color: #afd9ee"><strong>Sequence Relationship</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+{% block parse %}
+    {{ ddata.20.time }}
+    {{ ddata.20.id }}
+    {{ did.20 }}
+    {{ dano.0.0 }}
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Detect";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Detect";
+    </script>
+{% endblock %}

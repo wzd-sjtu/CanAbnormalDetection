@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+{% block home %}
+      <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <h1 style="text-align: center">Our main work</h1>
+            <div class="mx-auto position-relative gallery-container">
+            <div class="circle intro-circle-1"></div>
+            <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/parse'>Parse</a></h1>
+                                <p class="mb-4" style="font-size: large">
+                                    Parse a normal dataset, and extract behavioral features
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/detect'>Detect</a></h1>
+                                <p class="mb-4" style="font-size: large">
+                                    Detect anomaly in the given data set
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/construct'>Construct</a></h1>
+                                <p class="mb-4" style="font-size: large">
+                                    Generate a data set with or without anomalies for testing
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        var item = document.getElementById("homehref")
+        item.setAttribute("class", "nav-item selected")
+    </script>
+{% endblock %}

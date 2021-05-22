@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+    <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/"><strong>Home</strong></a></li>
+            <li><a href="/parse" style="color: #afd9ee"><strong>Parse</strong></a></li>
+        </ol>
+    </div>
+{% endblock %}
+{% block parse %}
+    <div class="col-xs-4">
+        <form method="post" enctype="multipart/form-data" action="/parse/">
+            {% csrf_token %}
+            <input type="file" name="myfile">
+            <button class="submit" type="submit">Submit</button>
+        </form>
+    </div>
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>Parsing a normal dataset</h1>
+                <h3> of CAN messages for behavioral features, preparing for <a href="/detect">Detecting</a></h3>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-4">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/parse/sequence'>Sequence</a></h1>
+                                <p class="mb-4" style="font-size: large">
+                                    Features of the ID sequence
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/parse/datafield'>Datafield</a>
+                                </h1>
+                                <p class="mb-4" style="font-size: large">
+                                    Description
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </div>
+            </div>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Parse";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Parse";
+    </script>
+{% endblock %}
