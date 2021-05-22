@@ -52,8 +52,6 @@ urlpatterns = [
     path('reput_attack', views.reput_attack),
     path('changeDataField_attack', views.changeDataField_attack),
 
-
     # url:"/attack_make",
     path('attack_make', views.attack_make),
-
 ]

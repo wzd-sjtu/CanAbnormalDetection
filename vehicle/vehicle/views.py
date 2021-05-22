@@ -12,7 +12,6 @@ from CanConstruct.code.LoadDataClass import LoadDataClass
 from CanConstruct.code.BasicClass import DataFieldAttackInformation
 import pandas as pd
 
-# 这个列表变量总是需要传输进去的，无法根据ajax动态生成？对的
 global_data = []
 global_IDs = []
 global_data_detect = []
@@ -30,6 +29,7 @@ allCanIdList = ['19E', '621', '601', '348', '60C', '481', '263', '604',
                  '1.00E+05', '608', '120', '1C6', '471', '230', 'E1', '603',
                  '1C3', '4C1', '128', '589', '1F1', '12A']
 
+
 def instantiate_global_data(file):
     """ 读取正常数据集，实例化SingleData，将其加入global_data列表
         同时生成id列表 """
@@ -41,7 +41,7 @@ def instantiate_global_data(file):
         items = line.decode('utf-8').strip().split(',')
         # hex_to_dec = int(items[2], 16)
         # dec_to_bin = bin(hex_to_dec)[2:]
-        sd = gm.SingleData(items[0], items[2], items[1], items[3])
+        sd = gm.SingleData(items[0], items[2].upper(), items[1], items[3])
         global_data.append(sd)
         global_IDs.append(items[2].upper())
 
@@ -56,7 +56,7 @@ def instantiate_global_data_detect(file):
         items = line.decode('utf-8').strip().split(',')
         # hex_to_dec = int(items[2], 16)
         # dec_to_bin = bin(hex_to_dec)[2:]
-        sd = gm.SingleDataDetect(items[0], items[2], items[1], items[3])
+        sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3])
         global_data_detect.append(sd)
         global_IDs_detect.append(items[2].upper())
 
@@ -66,8 +66,7 @@ def home(request):
 
 
 def parse(request):
-    # 这里的request没有给全？代码编写存在逻辑错误的
-    file = request.FILES.get('myfile', {'targetChoics': allCanIdList})
+    file = request.FILES.get('myfile')
     items = []
     if file:
         instantiate_global_data(file)
@@ -98,12 +97,12 @@ def detect(request):
         instantiate_global_data_detect(file)
         return render(request, 'detect/detect.html', {'ddata': global_data_detect, 'did': global_IDs_detect, 'targetChoics': allCanIdList})
     else:
-        return render(request, 'detect/detect.html')
+        return render(request, 'detect/detect.html', {'targetChoics': allCanIdList})
 
 
 def _detect_sequence(request):
-    ano1 = df.detect_seq_id_statistics(global_IDs_detect, global_features[0].stat)
-    ano2 = df.detect_seq_id_survival_rate(global_IDs_detect, global_features[0].SR)
+    ano1 = df.detect_seq_id_statistics(global_data_detect, global_features[0].stat)
+    ano2 = df.detect_seq_id_survival_rate(global_data_detect, global_features[0].SR)
     anomalies = [ano1, ano2]
     return render(request, 'detect/sequence.html',
                   {'ddata': global_data_detect, 'did': global_IDs_detect, 'dano': anomalies, 'targetChoics': allCanIdList})
@@ -141,7 +140,6 @@ def contact(request):
 
 
 def rules(request):
-    # 这里myfile的意义是不够明确的
     file = request.FILES.get('myfile')
     raw_lines = file.readlines()
     lines = []
@@ -152,7 +150,6 @@ def rules(request):
 
 def uniqueid(request):
     return render(request, 'uniqueid.html', {'targetChoics': allCanIdList})
-
 
 def construct(request):
 
@@ -166,7 +163,7 @@ def construct(request):
     # 这里的load不知道如何导入呢？应当提供尽可能高的可用性
 
 
-    return render(request, 'construct/construct.html', {'targetChoics': allCanIdList})
+    return render(request, 'construct/construct.html')
 
 # 报文网页可以一点点写，提高efficiency
 def _construct_insert(request):
@@ -202,17 +199,17 @@ def insert_attack(request):
         # 不妨存储为一个小小的字典哦
         for i in range(0, num):
             time_loc = "time" + str(i)
-            target_dict[time_loc] = tmp.iloc[i]['time']
+            target_dict[time_loc] = str(tmp.iloc[i]['time'])
             can_id_loc = "can_id" + str(i)
-            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
             data_loc = "data_in_hex" + str(i)
-            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
             description_loc = "erase_attack"
             target_dict[description_loc] = "insert attack"
 
         response = JsonResponse(target_dict)
 
-        return response # 这里是ajax，不需要处理列表显示的问题
+        return response
     # 以下才是较为标准的写法，这点谨记
     #response = JsonResponse({"status": '服务器接收成功', 'data': data, 'list': list})
     #return response
@@ -249,13 +246,13 @@ def erase_attack(request):
         # 不妨存储为一个小小的字典哦
         for i in range(0, num):
             time_loc = "time" + str(i)
-            target_dict[time_loc] = tmp.iloc[i]['time']
+            target_dict[time_loc] = str(tmp.iloc[i]['time'])
             can_id_loc = "can_id" + str(i)
-            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
             data_loc = "data_in_hex" + str(i)
-            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
             description_loc = "description" + str(i)
-            target_dict[description_loc] = tmp.iloc[i]['description']
+            target_dict[description_loc] = str(tmp.iloc[i]['description'])
 
         response = JsonResponse(target_dict)
 
@@ -297,11 +294,11 @@ def reput_attack(request):
             # 不妨存储为一个小小的字典哦
             for i in range(0, num):
                 time_loc = "time" + str(i)
-                target_dict[time_loc] = tmp.iloc[i]['time']
+                target_dict[time_loc] = str(tmp.iloc[i]['time'])
                 can_id_loc = "can_id" + str(i)
-                target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+                target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
                 data_loc = "data_in_hex" + str(i)
-                target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+                target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
                 description_loc = "erase_attack"
                 target_dict[description_loc] = "reput attack"
 
@@ -326,11 +323,11 @@ def reput_attack(request):
             # 不妨存储为一个小小的字典哦
             for i in range(0, num):
                 time_loc = "time" + str(i)
-                target_dict[time_loc] = tmp.iloc[i]['time']
+                target_dict[time_loc] = str(tmp.iloc[i]['time'])
                 can_id_loc = "can_id" + str(i)
-                target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+                target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
                 data_loc = "data_in_hex" + str(i)
-                target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+                target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
                 description_loc = "erase_attack"
                 target_dict[description_loc] = "reput attack"
 
@@ -391,13 +388,13 @@ def changeDataField_attack(request):
         # 不妨存储为一个小小的字典哦
         for i in range(0, num):
             time_loc = "time" + str(i)
-            target_dict[time_loc] = tmp.iloc[i]['time']
+            target_dict[time_loc] = str(tmp.iloc[i]['time'])
             can_id_loc = "can_id" + str(i)
-            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
             data_loc = "data_in_hex" + str(i)
-            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
             description_loc = "description" + str(i)
-            target_dict[description_loc] = tmp.iloc[i]['description']
+            target_dict[description_loc] = str(tmp.iloc[i]['description'])
 
         response = JsonResponse(target_dict)
 
@@ -443,7 +440,6 @@ def attack_make(request):
                 attackCreateExample.changedatafield_attack_const_or_multivalue(str(chose_id),float(chose_attack_exist_time))
             elif chose_datafield_attack_method == "传感器修改Sensor":
                 # 具体的攻击逻辑存储在后台的类里面，并不存在于这里的
-                # 这里的攻击逻辑其实是有问题的，需要在description中加入最终的规则描述
                 tyty = 0
                 if chose_sensor_attack_type == "max-value":
                     tyty = 0
@@ -463,13 +459,13 @@ def attack_make(request):
         # 总而言之，异常信息是存进去了，暂时不知道如何展示？
         for i in range(0, num):
             time_loc = "time" + str(i)
-            target_dict[time_loc] = tmp.iloc[i]['time']
+            target_dict[time_loc] = str(tmp.iloc[i]['time'])
             can_id_loc = "can_id" + str(i)
-            target_dict[can_id_loc] = tmp.iloc[i]['can_id']
+            target_dict[can_id_loc] = str(tmp.iloc[i]['can_id'])
             data_loc = "data_in_hex" + str(i)
-            target_dict[data_loc] = tmp.iloc[i]['data_in_hex']
+            target_dict[data_loc] = str(tmp.iloc[i]['data_in_hex'])
             description_loc = "description" + str(i)
-            target_dict[description_loc] = tmp.iloc[i]['description']
+            target_dict[description_loc] = str(tmp.iloc[i]['description'])
 
         response = JsonResponse(target_dict)
 
@@ -477,4 +473,4 @@ def attack_make(request):
 
 
 def _construct_about(request):
-    return render(request, 'construct/construct_about.html', {'targetChoics': allCanIdList})
+    return render(request, 'construct/construct_about.html')

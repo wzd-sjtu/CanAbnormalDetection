@@ -107,5 +107,6 @@ def parse_seq_cos_sim(global_data):
     FV[0] = len(idSet)
     FV[3] = (47 + FV[2] * 8) * FV[1] / 500000
     CSlist.append(cos_sim(FV))
-
-    return CSlist
+    minCS = min(CSlist)
+    maxCS = max(CSlist)
+    return [minCS, maxCS]

@@ -8,7 +8,7 @@
         </ol>
     </div>
 {% endblock %}
-{% block parse %}
+{% block detect %}
     <div class="col-xs-4">
         <form method="post" enctype="multipart/form-data" action="/detect/">
             {% csrf_token %}
@@ -33,9 +33,6 @@
                                 <h1 class="mb-4" style="text-align: center"><a href='/detect/sequence'>Sequence</a></h1>
                                 <p class="mb-4" style="font-size: large">
                                     Detecting with features of a single ID
-                                    {{ ddata.20.time }}
-                                    {{ ddata.20.id }}
-                                    {{ did.20 }}
                                 </p>
                             </div>
                         </div>

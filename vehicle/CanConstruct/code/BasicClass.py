@@ -1,5 +1,5 @@
 # 数据格式统一规定，命名类名为小驼峰，其余为下划线命名方式
-import json
+
 # 最底层的数据单元
 class SingleData:
     can_id = None
@@ -81,10 +81,7 @@ class Rule:
         self.end_loc = end_loc
         self.type_of_class = type_of_class
         # range总是固定的？
-        # val = data.iloc[i]['value_list']
-        # val = json.loads(val)
-        val = json.loads(range)
-        self.range = val
+        self.range = range
         self.length = length
 class RuleMap():
     ruleMap = {}

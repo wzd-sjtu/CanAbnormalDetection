@@ -2,32 +2,31 @@
 from .parse_funcs import cos_sim
 
 
-def detect_seq_id_statistics(id_list, idFinalStat):
+def detect_seq_id_statistics(global_data, idFinalStat):
     idAppear = {}  # ID: prev, curr
-    totalLength = len(id_list)
     uniqueIDs = idFinalStat.keys()
 
     anomalies = []
 
-    for i in range(totalLength):
-        tmpID = id_list[i]
+    for i in global_data:
+        tmpID = i.id
         if tmpID not in uniqueIDs:
-            anomalies.append('Anomaly detected: ID ' + tmpID + ' unidentified\n')
+            anomalies.append([tmpID, -1, i.number, i.time])
             continue
         elif tmpID not in idAppear.keys():
-            idAppear[tmpID] = [i, i]
+            idAppear[tmpID] = [i.number, i.number]
         else:
-            prev = idAppear[tmpID][1]
-            curr = i
+            prev = int(idAppear[tmpID][1])
+            curr = int(i.number)
             idAppear[tmpID] = [prev, curr]
             if curr - prev < idFinalStat[tmpID][2] or curr - prev > idFinalStat[tmpID][3]:
-                anomalies.append('Anomaly detected: ID ' + tmpID + ' with unusual intervals:' + str(curr - prev) + '\n')
-    return anomalies
+                anomalies.append([tmpID, curr - prev, i.number, i.time])
+    return anomalies  # html中通过 {{ dano.0 }} 调用此变量
 
 
-def detect_seq_id_survival_rate(id_list, SRDict):
+def detect_seq_id_survival_rate(global_data, SRDict):
     idChunk = {}  # {ID: probability in a chunk, ...}
-    length = len(id_list)
+    length = len(global_data)
     chunk = 100
     sig = 1 / chunk  # probability of one occurrence
     pos = 0  # global position
@@ -36,7 +35,8 @@ def detect_seq_id_survival_rate(id_list, SRDict):
     anomalies = []
 
     while pos < length:
-        ID = id_list[pos]
+        tmpSingleData = global_data[pos]
+        ID = tmpSingleData.id
         if ID not in SRDict.keys():
             pos += 1
             chunkPos = (chunkPos + 1) % chunk
@@ -50,12 +50,11 @@ def detect_seq_id_survival_rate(id_list, SRDict):
         if chunkPos == chunk - 1:
             for ID, prob in idChunk.items():
                 if prob > SRDict[ID][1] or prob < SRDict[ID][0]:
-                    anomalies.append('Anomaly detected: ID ' + ID + ' with frequency ' +
-                                     str(round(prob, 2)) + '\n')
+                    anomalies.append([ID, [global_data[pos-99].time, tmpSingleData.time], round(prob, 2)])
             idChunk.clear()
         pos += 1
         chunkPos = (chunkPos + 1) % chunk
-    return anomalies
+    return anomalies  # html中通过 {{ dano.1 }} 调用此变量
 
 
 def detect_seq_cos_sim(global_data_detect, CSlist):
@@ -63,8 +62,10 @@ def detect_seq_cos_sim(global_data_detect, CSlist):
     idSet = []
     cnt = 0
     time_itv = 0.01
-    minCS = min(CSlist)
-    maxCS = max(CSlist)
+    minCS = CSlist[0]
+    maxCS = CSlist[1]
+
+    initTime = ''
 
     anomalies = []
 
@@ -76,19 +77,21 @@ def detect_seq_cos_sim(global_data_detect, CSlist):
 
             cs = cos_sim(FV)  # calculate cos similarity
             if cs < minCS or cs > maxCS:
-                anomalies.append('Anomaly detected: ID sub seq ' + str(int(cnt / time_itv)) +
-                                 ' with unusual cosine sim: ' + str(cs) + '\n')
+                anomalies.append([int(cnt / time_itv), [initTime, text[0]],  cs])
 
             # reset
             cnt += time_itv
             FV = [0, 0, 0, 0]
             idSet = [text[1]]
+            initTime = ''
             FV[1] += 1
             FV[2] += int(text[2])
         else:
             if text[1] not in idSet:
                 idSet.append(text[1])
+                if len(idSet) == 1:
+                    initTime = text[0]
             FV[1] += 1
             FV[2] += int(text[2])
 
-    return anomalies
+    return anomalies    # html中通过 {{ dano.0 }} 调用此变量

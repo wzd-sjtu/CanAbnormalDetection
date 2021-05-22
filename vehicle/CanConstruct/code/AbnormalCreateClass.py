@@ -3,11 +3,11 @@ import random
 import pandas as pd
 import numpy as np
 
-from BasicClass import SingleData,\
+from .BasicClass import SingleData,\
     DataList, DataListType, Rule, RuleMap
-from CodingTypeChange import hex_str_to_binary_str, \
+from .CodingTypeChange import hex_str_to_binary_str, \
     binary_str_to_hex_str
-from AbnormalDescriptionClass import AbnormalDescriptionClass
+from .AbnormalDescriptionClass import AbnormalDescriptionClass
 
 # 写代码结构化有利于自己写的更清晰
 class AttackCreate:
@@ -419,7 +419,9 @@ class AttackCreate:
         # 另一种是历史序列重放，可以认为是变种重返攻击
         # doc path是完全不需要的
         # 只对某种报文进行数据域修改，description也是暂时不需要的，应该是的吧
+
         self.get_rule(" ")
+
         '''
         新的tag标志
         
@@ -637,15 +639,8 @@ class AttackCreate:
             document_name = self.document_name
             if not os.path.exists(self.store_place):
                 os.mkdir(self.store_place)
-            df3 = tmp_origin_data.loc[0].copy()
             tmp_origin_data = tmp_origin_data.loc[0].copy()
             tmp_origin_data.to_csv(self.store_place + "/" + document_name)
-
-            descriptionTmp = "There is no sensor segment in this id!"
-            self.descriptionStruct.updateBasicInformation(7, df3['can_id'],
-                                                          df3['time'],
-                                                          descriptionTmp,
-                                                          df3['data_in_binary'])
             self.descriptionStruct.writeIntoCsv()
             return
 
@@ -685,28 +680,18 @@ class AttackCreate:
 
                 # 以下是攻击的核心内容，根据不同的type，制造不同类型的攻击
                 # 想要实现多态攻击，这里的粒度还暂时不够
-
-                # 这里是攻击的具体内容？对的，的确是具体内容喽
-                # length_of_bit
-
-                min_value = int(val_range[0])
-                max_value = int(val_range[1])
-                max_gradient = int(val_range[2])
-                random_value = round(random.random()*(max_value-min_value)) + min_value
-
-                min_value = format(min_value, "b").zfill(length_of_bit)
-                max_value = format(max_value, "b").zfill(length_of_bit)
-                random_value = format(random_value, "b").zfill(length_of_bit)
-
                 if basicType == 2: # 不一定在传感器取值范围
                     for love in range(random_begin_bit, random_end_bit + 1):
-                        target_binary_bit[love] = random_value[love-random_begin_bit]
+                        if (random.random() > 0.5):
+                            target_binary_bit[love] = '0'
+                        else:
+                            target_binary_bit[love] = '1'
                 elif basicType == 0:
                     for love in range(random_begin_bit, random_end_bit + 1):
-                        target_binary_bit[love] = max_value[love-random_begin_bit]
+                        target_binary_bit[love] = '1'
                 elif basicType == 1:
                     for love in range(random_begin_bit, random_end_bit + 1):
-                        target_binary_bit[love] = min_value[love-random_begin_bit]
+                        target_binary_bit[love] = '0'
 
 
                 target_binary_bit = "".join(target_binary_bit)
