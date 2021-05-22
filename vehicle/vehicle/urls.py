@@ -54,4 +54,6 @@ urlpatterns = [
 
     # url:"/attack_make",
     path('attack_make', views.attack_make),
+
+    path('completeSystem', views.complete_system),
 ]

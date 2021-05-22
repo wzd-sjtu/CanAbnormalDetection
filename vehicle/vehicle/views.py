@@ -474,3 +474,6 @@ def attack_make(request):
 
 def _construct_about(request):
     return render(request, 'construct/construct_about.html')
+
+def complete_system(request):
+    return render(request, 'CompleteRow/complete.html', {'targetChoics': allCanIdList})
