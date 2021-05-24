@@ -7,10 +7,17 @@ from . import generalModels as gm
 from . import parse_funcs as pf
 from . import detect_funcs as df
 
+from ParseDetect._parse_datafield import ParseData
+from ParseDetect._detect_datafield import DatafieldDetect
+from ParseDetect._parse_cluster import ParseCluster
+from ParseDetect._detect_cluster import ClusterDetect
+from ParseDetect.used_class import type_dict
+
 from CanConstruct.code.AbnormalCreateClass import AttackCreate
 from CanConstruct.code.LoadDataClass import LoadDataClass
 from CanConstruct.code.BasicClass import DataFieldAttackInformation
 import pandas as pd
+import time
 
 global_data = []
 global_IDs = []
@@ -18,7 +25,14 @@ global_data_detect = []
 global_IDs_detect = []
 global_features = []
 
+global_dataframe = None
+data_rule_dataframe = None
+global_detect_data_frame = None
+cluster_model_list = None
+cluster_array = None
 
+datafield_deviant = None
+cluster_deviant = None
 
 loadDataExample = None
 attackCreateExample = None # 使用的全局变量，可否用静态变量的方式存储？不清楚
@@ -45,6 +59,10 @@ def instantiate_global_data(file):
         global_data.append(sd)
         global_IDs.append(items[2].upper())
 
+    global global_dataframe
+    file.seek(0)
+    global_dataframe = pd.read_csv(file, index_col=0)
+
 
 def instantiate_global_data_detect(file):
     """ 读取待检测的数据集并实例化相应数据结构 """
@@ -59,6 +77,10 @@ def instantiate_global_data_detect(file):
         sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3])
         global_data_detect.append(sd)
         global_IDs_detect.append(items[2].upper())
+
+    global global_detect_data_frame
+    file.seek(0)
+    global_detect_data_frame = pd.read_csv(file, index_col=0)
 
 
 def home(request):
@@ -87,7 +109,32 @@ def _parse_sequence(request):
 
 
 def _parse_datafield(request):
-    return render(request, 'parse/datafield.html', {'data': global_data, 'id': global_IDs, 'feat': global_features, 'targetChoics': allCanIdList})
+    global data_rule_dataframe, global_dataframe
+    global cluster_model_list, cluster_array
+    prd = ParseData(global_dataframe)
+    prd.run()
+    data_rule_dataframe = prd.get_result()
+    show_rule_dataframe = pd.DataFrame(data_rule_dataframe, copy=True)
+    # show_rule_dataframe.rename(index=type_dict, inplace=True)
+
+    sensor_dict = prd.get_sensor()
+    sc = ParseCluster(global_dataframe, sensor_dict)
+    sc.run()
+    cluster_model_list = sc.get_model()
+    cluster_array = sc.get_cluster()
+    cluster_dict_array = []
+    for cluster in cluster_array:
+        cluster_dict_list = []
+        for sing_cluster in cluster:
+            canid, byte = sing_cluster.split('_')
+            byte = "D" + byte
+            tmp_dict = {
+                'canid': canid,
+                'byte': byte
+            }
+            cluster_dict_list.append(tmp_dict)
+        cluster_dict_array.append(cluster_dict_list)
+    return render(request, 'parse/datafield.html', {'data_rule': show_rule_dataframe, 'cluster_array': cluster_dict_array})
 
 
 def detect(request):
@@ -109,8 +156,15 @@ def _detect_sequence(request):
 
 
 def _detect_datafield(request):
+    global datafield_deviant, global_detect_data_frame, data_rule_dataframe
+    print(time.perf_counter())
+    dd = DatafieldDetect(global_detect_data_frame, data_rule_dataframe)
+    dd.run()
+    print(time.perf_counter())
+    datafield_deviant = dd.get_deviant()
+    print(datafield_deviant)
     return render(request, 'detect/datafield.html',
-                  {'ddata': global_data_detect, 'did': global_IDs_detect, 'dfeat': global_features, 'targetChoics': allCanIdList})
+                  {'datafield_deviant': datafield_deviant})
 
 
 def _detect_sequenceRelationship(request):
@@ -121,8 +175,14 @@ def _detect_sequenceRelationship(request):
 
 
 def _detect_datafieldRelationship(request):
+    global global_detect_data_frame, cluster_deviant
+    global cluster_model_list, cluster_array
+    cd = ClusterDetect(cluster_array, global_detect_data_frame, cluster_model_list)
+    cd.run()
+    cluster_deviant = cd.get_deviant()
+    print(cluster_deviant)
     return render(request, 'detect/df_relate.html',
-                  {'ddata': global_data_detect, 'did': global_IDs_detect, 'dfeat': global_features, 'targetChoics': allCanIdList})
+                  {'cluster_deviant': cluster_deviant})
 
 
 
