@@ -11,13 +11,36 @@
 
 {% block completeSystem %}
     <!-- 这里需要仔细想一下设计问题？ -->
+    <!-- 一些多余的css -->
+    <style type="text/css">
+
+                         span{height:40px; width:40px; display:block; position:relative;}
+
+                        .demoSpan1{border-radius:50px;-webkit-border-radius:50px;-moz-border-radius:50px; background:#333;}
+
+                        .demoSpan1:after, .demoSpan1:before{content:''; height:28px; width:6px; display:block; background:#fff; position:absolute; top:6px; left:20px; border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px; transform:rotate(45deg);-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);-ms-transform:rotate(45deg);}
+
+                        .demoSpan1:before{height:12px; transform:rotate(-45deg);-webkit-transform:rotate(-45deg);-moz-transform:rotate(-45deg);-o-transform:rotate(-45deg);-ms-transform:rotate(-45deg); top:18px; left:8px;}
+
+    </style>
+    <style type="text/css">
+
+         span{height:40px; width:40px; display:block; position:relative;}
+
+        .demoSpan2{border-radius:50px;-webkit-border-radius:50px;-moz-border-radius:50px; background:#333;}
+
+        .demoSpan2:before, .demoSpan2:after{content:''; height:6px; width:28px; display:block; background:#fff; border-radius:10px;-webkit-border-radius:10px;-moz-border-radius:10px; position:absolute; top:17px; left:6px; transform:rotate(-45deg);-webkit-transform:rotate(-45deg);-moz-transform:rotate(-45deg);-o-transform:rotate(-45deg);-ms-transform:rotate(-45deg);}
+
+        .demoSpan2:after{transform:rotate(45deg);-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-o-transform:rotate(45deg);-ms-transform:rotate(45deg);}
+
+        </style>
     <div class="page-container">
         <div style="height:200px;background-color: black;
         border-radius: 20px;
         background-color:rgba(0,0,0,0.5);">
             <div class="row"
                  style="margin:25px auto;">
-                <div class="col-md-2"></div>
+                <div class="col-md-1"></div>
                 <div class="col-md-3"
                     style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
                             background-size:100% 100%;height:150px;">
@@ -25,16 +48,20 @@
                     <h1 style="font-size:25px;color:cornflowerblue;
                     text-align: center;"> 报文周期格式检测 </h1>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-2"></div>
                 <div class="col-md-3">
 
                     <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false"
                             style="color:deepskyblue;background-color: rgba(0,0,0,0.5);border-radius: 20px;
-                                    margin:50px auto;width:100px;">
+                                    margin:50px auto;width:100px;" id="first_button">
                         检测
                     </button>
                 </div>
-                <div class="col-md-1"></div>
+                <div class="col-md-3" id="first_span">
+
+                    <span class="demoSpan2" style="margin:50px;">
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -54,7 +81,7 @@
         background-color:rgba(0,0,0,0.5);">
             <div class="row"
                  style="margin:25px auto;">
-                <div class="col-md-2"></div>
+                <div class="col-md-1"></div>
                 <div class="col-md-3"
                     style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
                             background-size:100% 100%;height:150px;">
@@ -62,16 +89,20 @@
                     <h1 style="font-size:25px;color:cornflowerblue;
                     text-align: center;"> 报文周期格式检测 </h1>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-2"></div>
                 <div class="col-md-3">
 
                     <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false"
                             style="color:deepskyblue;background-color: rgba(0,0,0,0.5);border-radius: 20px;
-                                    margin:50px auto;width:100px;">
+                                    margin:50px auto;width:100px;" id="second_button">
                         检测
                     </button>
                 </div>
-                <div class="col-md-1"></div>
+                <div class="col-md-3" id="second_span" >
+
+                    <span class="demoSpan2" style="margin:50px;">
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -85,12 +116,14 @@
             <div class="col-md-5"></div>
         </div>
 
+
+
         <div style="height:200px;background-color: black;
         border-radius: 20px;
         background-color:rgba(0,0,0,0.5);">
             <div class="row"
                  style="margin:25px auto;">
-                <div class="col-md-2"></div>
+                <div class="col-md-1"></div>
                 <div class="col-md-3"
                     style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
                             background-size:100% 100%;height:150px;">
@@ -98,16 +131,20 @@
                     <h1 style="font-size:25px;color:cornflowerblue;
                     text-align: center;"> 报文周期格式检测 </h1>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-2"></div>
                 <div class="col-md-3">
 
                     <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false"
                             style="color:deepskyblue;background-color: rgba(0,0,0,0.5);border-radius: 20px;
-                                    margin:50px auto;width:100px;">
+                                    margin:50px auto;width:100px;" id="third_button">
                         检测
                     </button>
                 </div>
-                <div class="col-md-1"></div>
+                <div class="col-md-3" id="third_span">
+
+                    <span class="demoSpan2" style="margin:50px;">
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -121,12 +158,14 @@
             <div class="col-md-5"></div>
         </div>
 
+
+
         <div style="height:200px;background-color: black;
         border-radius: 20px;
         background-color:rgba(0,0,0,0.5);">
             <div class="row"
                  style="margin:25px auto;">
-                <div class="col-md-2"></div>
+                <div class="col-md-1"></div>
                 <div class="col-md-3"
                     style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
                             background-size:100% 100%;height:150px;">
@@ -134,17 +173,82 @@
                     <h1 style="font-size:25px;color:cornflowerblue;
                     text-align: center;"> 报文周期格式检测 </h1>
                 </div>
-                <div class="col-md-3"></div>
+                <div class="col-md-2"></div>
                 <div class="col-md-3">
 
                     <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false"
                             style="color:deepskyblue;background-color: rgba(0,0,0,0.5);border-radius: 20px;
-                                    margin:50px auto;width:100px;">
+                                    margin:50px auto;width:100px;" id="fourth_button">
                         检测
                     </button>
                 </div>
-                <div class="col-md-1"></div>
+                <div class="col-md-3" id="fourth_span">
+
+                    <span class="demoSpan2" style="margin:50px;">
+                    </span>
+                </div>
             </div>
         </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     </div>
+
+    <script src="/static/js/jquery-3.5.1.min.js"></script>
+    <script>
+        // 这里书写了一小部分数据的交互过程
+        $(function() {
+            $("#first_button").click(function() {
+                var tmp = $('#first_span');
+                tmp.empty();
+                // <span class="demoSpan2" style="margin:50px;"></span>
+                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
+
+                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                tmp.append(data);
+            })
+        });
+
+        $(function() {
+            $("#second_button").click(function() {
+                var tmp = $('#second_span');
+                tmp.empty();
+                // <span class="demoSpan2" style="margin:50px;"></span>
+                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
+
+                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                tmp.append(data);
+            })
+        });
+
+
+        $(function() {
+            $("#third_button").click(function() {
+                var tmp = $('#third_span');
+                tmp.empty();
+                // <span class="demoSpan2" style="margin:50px;"></span>
+                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
+
+                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                tmp.append(data);
+            })
+        });
+
+
+        $(function() {
+            $("#fourth_button").click(function() {
+                var tmp = $('#fourth_span');
+                tmp.empty();
+                // <span class="demoSpan2" style="margin:50px;"></span>
+                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
+
+                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                tmp.append(data);
+            })
+        });
+    </script>
 {% endblock %}
+
