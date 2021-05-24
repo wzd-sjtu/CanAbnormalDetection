@@ -537,3 +537,31 @@ def _construct_about(request):
 
 def complete_system(request):
     return render(request, 'CompleteRow/complete.html', {'targetChoics': allCanIdList})
+
+
+def first_detect(request):
+    # 这里涉及到了攻击的制造，需要写很多代码？
+    target_list = {}
+    if request.is_ajax():
+        response = JsonResponse(target_list)
+        return response
+def second_detect(request):
+    # 这里涉及到了攻击的制造，需要写很多代码？
+    target_list = {}
+    if request.is_ajax():
+        response = JsonResponse(target_list)
+        return response
+
+def third_detect(request):
+    # 这里涉及到了攻击的制造，需要写很多代码？
+    target_list = {}
+    if request.is_ajax():
+        response = JsonResponse(target_list)
+        return response
+
+def fourth_detect(request):
+    # 这里涉及到了攻击的制造，需要写很多代码？
+    target_list = {}
+    if request.is_ajax():
+        response = JsonResponse(target_list)
+        return response

@@ -56,4 +56,11 @@ urlpatterns = [
     path('attack_make', views.attack_make),
 
     path('completeSystem', views.complete_system),
+
+    # 写入了一个比较简单的ajax？对的
+    path('first_table', views.first_detect),
+    path('second_table', views.second_detect),
+    path('third_table', views.third_detect),
+    path('fourth_table', views.fourth_detect),
+
 ]
