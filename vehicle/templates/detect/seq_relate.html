@@ -102,6 +102,36 @@
                     </div>
                 </div>
             </div>
+            <div style="text-align: center">
+                <h1>LSTM训练结果</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>检测时间段</th>
+                                <th>预测字段</th>
+                                <th>是否错误</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for b, e, result, ifwrong in dano.1 %}
+                                <tr>
+                                    <td>{{ b }} ~ {{ e }}</td>
+                                    <td>{{ result }}</td>
+                                    <td>{{ ifwrong }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </ul>
     </div>
     <script type="text/javascript">

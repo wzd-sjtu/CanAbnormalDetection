@@ -17,7 +17,9 @@ from CanConstruct.code.AbnormalCreateClass import AttackCreate
 from CanConstruct.code.LoadDataClass import LoadDataClass
 from CanConstruct.code.BasicClass import DataFieldAttackInformation
 import pandas as pd
+import numpy as np
 import time
+import pickle
 
 global_data = []
 global_IDs = []
@@ -98,14 +100,27 @@ def parse(request):
 
 
 def _parse_sequence(request):
-    global_features.clear()
-    stat = pf.seq_id_statistics(global_IDs)
-    sr = pf.seq_id_survival_rate(global_IDs)
-    cos = pf.parse_seq_cos_sim(global_data)
-    feat = gm.NormalSeqFeatures(stat, sr, cos)
-    global_features.append(feat)
-    return render(request, 'parse/sequence.html',
-                  {'data': global_data, 'id': global_IDs, 'feat': global_features, 'targetChoics': allCanIdList}, )
+    if global_data:
+        global_features.clear()
+        stat = pf.seq_id_statistics(global_IDs)
+        sr = pf.seq_id_survival_rate(global_IDs)
+        cos = pf.parse_seq_cos_sim(global_data)
+        feat = gm.NormalSeqFeatures(stat, sr, cos)
+        global_features.append(feat)
+        file = open("seq_feature_sor", 'wb')
+        pickle.dump(global_features, file)
+        return render(request, 'parse/sequence.html',
+                      {'data': global_data, 'id': global_IDs, 'feat': global_features})
+    else:
+        return render(request, 'parse/sequence.html')
+
+
+def _parse_lstm(request):
+    if global_IDs:
+        pf.set_detect_seq_lstm(global_IDs)
+        return render(request, 'parse/sequence.html', {'result': "训练成功"})
+    else:
+        return render(request, 'parse/sequence.html')
 
 
 def _parse_datafield(request):
@@ -168,10 +183,14 @@ def _detect_datafield(request):
 
 
 def _detect_sequenceRelationship(request):
-    ano1 = df.detect_seq_cos_sim(global_data_detect, global_features[0].cosSim)
-    anomalies = [ano1]
-    return render(request, 'detect/seq_relate.html',
-                  {'ddata': global_data_detect, 'did': global_IDs_detect, 'dano': anomalies, 'targetChoics': allCanIdList})
+    if global_features:
+        ano1 = df.detect_seq_cos_sim(global_data_detect, global_features[0].cosSim)
+        ano2 = df.detect_seq_lstm(global_IDs,global_data_detect)
+        anomalies = [ano1, ano2]
+        return render(request, 'detect/seq_relate.html',
+                      {'ddata': global_data_detect, 'did': global_IDs_detect, 'dano': anomalies})
+    else:
+        return render(request, 'detect/seq_relate.html')
 
 
 def _detect_datafieldRelationship(request):
@@ -543,25 +562,210 @@ def first_detect(request):
     # 这里涉及到了攻击的制造，需要写很多代码？
     target_list = {}
     if request.is_ajax():
-        response = JsonResponse(target_list)
+        file = open("./vehicle/seq_features_stor", "rb")
+        features = pickle.load(file)
+        file.close()
+        datas = []
+        with open("./CanConstruct/src/attack_test/attack_data.csv", "r") as file:
+            raw_lines = file.readlines()
+            raw_lines.pop(0)
+            for line in raw_lines:
+                items = line.split(',')
+                # hex_to_dec = int(items[2], 16)
+                # dec_to_bin = bin(hex_to_dec)[2:]
+                sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3])
+                datas.append(sd)
+
+        # ano1 = [[tmpID, curr - prev, i.number, i.time], ...]
+        ano1 = df.detect_seq_id_statistics(datas, features[0].stat)
+        # ano2 = [[ID, [global_data[pos-99].time, tmpSingleData.time], round(prob, 2)], ...]
+        ano2 = df.detect_seq_id_survival_rate(datas, features[0].SR)
+        # ano3 = [[int(cnt / time_itv), [initTime, text[0]],  cs], ...]
+        ano3 = df.detect_seq_cos_sim(datas, features[0].cosSim)
+        print(ano3)
+
+        # generate total des list
+        total_ano = []  # [[id, time, des], ...]
+        for i in ano1:
+            if i[1] == -1:
+                total_ano.append([i[0], i[3], '从未出现过的ID'])
+            else:
+                total_ano.append([i[0], i[3], 'ID间隔异常: ' + str(i[1])])
+        for i in ano2:
+            total_ano.append([i[0], i[1][0] + '~' + i[1][1], 'ID生存率异常: ' + str(i[2])])
+        for i in ano3:
+            total_ano.append(['第' + str(i[0]) + '子段', i[1][0] + '~' + i[1][1], '余弦相似度异常: ' + str(i[2])])
+
+        target_dict = {}
+        total_length = len(total_ano)
+        target_dict['size'] = str(total_length)
+        # 不妨存储为一个小小的字典哦
+        # 总而言之，异常信息是存进去了，暂时不知道如何展示？
+        for i in range(0, total_length):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = total_ano[i][1]
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = total_ano[i][0]
+            # data_loc = "data_in_hex" + str(i)
+            # target_dict[data_loc] = str(deviant_data.iloc[i]['data_in_hex'])
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = total_ano[i][2]
+
+        response = JsonResponse(target_dict)
         return response
+
+
 def second_detect(request):
     # 这里涉及到了攻击的制造，需要写很多代码？
     target_list = {}
     if request.is_ajax():
-        response = JsonResponse(target_list)
+        file =open('./CanConstruct/src/target_res.csv','rb')
+        instantiate_global_data(file)
+        file.close()
+        file =open('./CanConstruct/src/attack_test/attack_data.csv','rb')
+        instantiate_global_data_detect(file)
+
+        ano = df.detect_seq_lstm(global_IDs, global_data_detect)
+        length = len(ano)
+        detect_ano = []
+        for i in ano:
+            detect_ano.append([i[2], i[0], '错误信息'])
+        print(detect_ano)
+        target_dict = {}
+        target_dict['size'] = length
+        for i in range(0, length):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = detect_ano[i][1]
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = detect_ano[i][0]
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = detect_ano[i][2]
+        response = JsonResponse(target_dict)
+        print(length)
         return response
+
+    # 这里涉及到了攻击的制造，需要写很多代码？
+    target_list = {}
+    # if request.is_ajax():
+    #     detect_data = pd.read_csv('./CANConstruct/src/attack_test/attack_data.csv', index_col=0)
+    #     rule_data = pd.read_pickle('./ParseDetect/src/_parse_rule.pkl')
+    #     dd = DatafieldDetect(detect_data, rule_data)
+    #     dd.run()
+    #     deviant_data = dd.get_deviant()
+    #     # print(deviant_data.Description)
+    #
+    #     target_dict = {}
+    #     num = deviant_data.shape[0]
+    #     target_dict['size'] = str(num)
+    #     # 不妨存储为一个小小的字典哦
+    #     # 总而言之，异常信息是存进去了，暂时不知道如何展示？
+    #     for i in range(0, num):
+    #         time_loc = "time" + str(i)
+    #         target_dict[time_loc] = str(deviant_data.iloc[i]['time'])
+    #         can_id_loc = "can_id" + str(i)
+    #         target_dict[can_id_loc] = str(deviant_data.iloc[i]['can_id'])
+    #         data_loc = "data_in_hex" + str(i)
+    #         target_dict[data_loc] = str(deviant_data.iloc[i]['data_in_hex'])
+    #         description_loc = "description" + str(i)
+    #         target_dict[description_loc] = str(deviant_data.iloc[i]['Description'])
+    #
+    #     response = JsonResponse(target_dict)
+    #     return response
+    #
+    # # 这里涉及到了攻击的制造，需要写很多代码？
+    # target_list = {}
+    #
+    # if request.is_ajax():
+    #     detect_data = pd.read_csv('./CANConstruct/src/attack_test/attack_data.csv', index_col=0)
+    #     # detect_data = pd.read_csv('./CANConstruct/src/target_res.csv', index_col=0)
+    #
+    #     cluster_array = np.load('./ParseDetect/src/cluster_array.npy', allow_pickle=True)
+    #     with open('./ParseDetect/src/lof_list', 'rb')as f:
+    #         lof_list = pickle.load(f)
+    #     cd = ClusterDetect(cluster_array, detect_data, lof_list)
+    #     cd.run()
+    #     cluster_deviant = cd.get_deviant()
+    #     print(cluster_deviant)
+    #     # print(cluster_deviant)
+    #
+    #     target_dict = {}
+    #     num = cluster_deviant.shape[0]
+    #     target_dict['size'] = str(num)
+    #     # 不妨存储为一个小小的字典哦
+    #     # 总而言之，异常信息是存进去了，暂时不知道如何展示？
+    #     for i in range(0, num):
+    #         time_loc = "time" + str(i)
+    #         target_dict[time_loc] = str(cluster_deviant.iloc[i]['time'])
+    #         can_id_loc = "can_id" + str(i)
+    #         target_dict[can_id_loc] = str(cluster_deviant.iloc[i]['can_id'])
+    #         data_loc = "data_in_hex" + str(i)
+    #         target_dict[data_loc] = str(cluster_deviant.iloc[i]['data_in_hex'])
+    #         description_loc = "description" + str(i)
+    #         target_dict[description_loc] = str(cluster_deviant.iloc[i]['Description'])
+    #
+    #     response = JsonResponse(target_dict)
+    #     return response
 
 def third_detect(request):
     # 这里涉及到了攻击的制造，需要写很多代码？
     target_list = {}
     if request.is_ajax():
-        response = JsonResponse(target_list)
+        detect_data = pd.read_csv('./CANConstruct/src/attack_test/attack_data.csv', index_col=0)
+        rule_data = pd.read_pickle('./ParseDetect/src/_parse_rule.pkl')
+        dd = DatafieldDetect(detect_data, rule_data)
+        dd.run()
+        deviant_data = dd.get_deviant()
+        # print(deviant_data.Description)
+
+        target_dict = {}
+        num = deviant_data.shape[0]
+        target_dict['size'] = str(num)
+        # 不妨存储为一个小小的字典哦
+        # 总而言之，异常信息是存进去了，暂时不知道如何展示？
+        for i in range(0, num):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = str(deviant_data.iloc[i]['time'])
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = str(deviant_data.iloc[i]['can_id'])
+            data_loc = "data_in_hex" + str(i)
+            target_dict[data_loc] = str(deviant_data.iloc[i]['data_in_hex'])
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = str(deviant_data.iloc[i]['Description'])
+
+        response = JsonResponse(target_dict)
         return response
 
 def fourth_detect(request):
     # 这里涉及到了攻击的制造，需要写很多代码？
     target_list = {}
+
     if request.is_ajax():
-        response = JsonResponse(target_list)
+        detect_data = pd.read_csv('./CANConstruct/src/attack_test/attack_data.csv', index_col=0)
+        #detect_data = pd.read_csv('./CANConstruct/src/target_res.csv', index_col=0)
+
+        cluster_array = np.load('./ParseDetect/src/cluster_array.npy', allow_pickle=True)
+        with open('./ParseDetect/src/lof_list','rb')as f:
+            lof_list = pickle.load(f)
+        cd = ClusterDetect(cluster_array, detect_data, lof_list)
+        cd.run()
+        cluster_deviant = cd.get_deviant()
+        print(cluster_deviant)
+        # print(cluster_deviant)
+
+        target_dict = {}
+        num = cluster_deviant.shape[0]
+        target_dict['size'] = str(num)
+        # 不妨存储为一个小小的字典哦
+        # 总而言之，异常信息是存进去了，暂时不知道如何展示？
+        for i in range(0, num):
+            time_loc = "time" + str(i)
+            target_dict[time_loc] = str(cluster_deviant.iloc[i]['time'])
+            can_id_loc = "can_id" + str(i)
+            target_dict[can_id_loc] = str(cluster_deviant.iloc[i]['can_id'])
+            data_loc = "data_in_hex" + str(i)
+            target_dict[data_loc] = str(cluster_deviant.iloc[i]['data_in_hex'])
+            description_loc = "description" + str(i)
+            target_dict[description_loc] = str(cluster_deviant.iloc[i]['Description'])
+
+        response = JsonResponse(target_dict)
         return response

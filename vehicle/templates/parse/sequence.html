@@ -62,16 +62,16 @@
     <div style="font-size: large">
         <ol class="breadcrumb" style="background-color: transparent">
             <li><a href="/"><strong>Home</strong></a></li>
-            <li><a href="/parse"><strong>Parse</strong></a></li>
-            <li><a href="/parse/sequence" style="color: #afd9ee"><strong>Sequence</strong></a></li>
+            <li><a href="/detect"><strong>Detect</strong></a></li>
+            <li><a href="/detect/sequence" style="color: #afd9ee"><strong>Sequence</strong></a></li>
         </ol>
     </div>
 {% endblock %}
-{% block parse_sequence %}
+{% block detect_seq %}
     <div class="container-fluid tm-content-container">
         <ul class="cd-hero-slider mb-0 py-5">
             <div style="text-align: center">
-                <h1>Statistic features of ID in sequence</h1>
+                <h1>ID基本统计特征 检测</h1>
             </div>
             <div class="mx-auto position-relative gallery-container">
                 <div class="circle intro-circle-1"></div>
@@ -81,22 +81,24 @@
                         <table style="width:80%; margin: auto">
                             <thead style="color:white">
                             <tr>
-                                <th>ID</th>
-                                <th>出现次数</th>
-                                <th>平均间隔</th>
-                                <th>最小间隔</th>
-                                <th>最大间隔</th>
+                                <th>异常ID</th>
+                                <th>序号</th>
+                                <th>出现时间</th>
+                                <th>性质</th>
                             </tr>
                             </thead>
-                            <tbody id="parse_seq_stat" style="padding: 5px 5px">
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
 
-                            {% for id, string in feat.0.stat.items %}
+                            {% for id, status, number, time in dano.0 %}
                                 <tr>
                                     <td>{{ id }}</td>
-                                    <td>{{ string.0 }}</td>
-                                    <td>{{ string.1 }}</td>
-                                    <td>{{ string.2 }}</td>
-                                    <td>{{ string.3 }}</td>
+                                    <td>{{ number }}</td>
+                                    <td>{{ time }}</td>
+                                    {% if status == -1 %}
+                                        <td>未出现过的ID</td>
+                                    {% else %}
+                                        <td>间隔异常--{{ status }}</td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -109,7 +111,7 @@
                 <br>
             </div>
             <div style="text-align: center">
-                <h1>Survival rate of ID in sequence</h1>
+                <h1>ID生存率 检测</h1>
             </div>
             <div class="mx-auto position-relative gallery-container">
                 <div class="circle intro-circle-1"></div>
@@ -119,48 +121,19 @@
                         <table style="width:80%; margin: auto">
                             <thead style="color:white">
                             <tr>
-                                <th>ID</th>
-                                <th>最小生存率</th>
-                                <th>最大生存率</th>
+                                <th>异常ID</th>
+                                <th>出现时间段</th>
+                                <th>异常生存率</th>
                             </tr>
                             </thead>
-                            <tbody id="parse_seq_stat" style="padding: 5px 5px">
-                                {% for id, string in feat.0.SR.items %}
-                                    <tr>
-                                        <td>{{ id }}</td>
-                                        <td>{{ string.0 }}</td>
-                                        <td>{{ string.1 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div>
-                <br>
-                <br>
-            </div>
-            <div style="text-align: center">
-                <h1>Cosine Similarity of sub sequences</h1>
-            </div>
-            <div class="mx-auto position-relative gallery-container">
-                <div class="circle intro-circle-1"></div>
-                <div class="circle intro-circle-2"></div>
-                <div class="mx-auto tm-border-top gallery-slider">
-                    <div>
-                        <table style="width:80%; margin: auto">
-                            <thead style="color:white">
-                            <tr>
-                                <th>最小余弦相似度</th>
-                                <th>最大余弦相似度</th>
-                            </tr>
-                            </thead>
-                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 100px;">
-                                    <tr>
-                                        <td>{{ feat.0.cosSim.0 }}</td>
-                                        <td>{{ feat.0.cosSim.1 }}</td>
-                                    </tr>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height:400px">
+                            {% for id, time, sr in dano.1 %}
+                                <tr>
+                                    <td>{{ id }}</td>
+                                    <td>{{ time.0 }} ~ {{ time.1 }}</td>
+                                    <td>{{ sr }}</td>
+                                </tr>
+                            {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -170,8 +143,8 @@
     </div>
     <script type="text/javascript">
         var item = document.getElementById("web_title");
-        item.innerHTML = "Parse";
+        item.innerHTML = "Detect";
         item = document.getElementById("web_logo");
-        item.innerHTML = "Parse";
+        item.innerHTML = "Detect";
     </script>
 {% endblock %}

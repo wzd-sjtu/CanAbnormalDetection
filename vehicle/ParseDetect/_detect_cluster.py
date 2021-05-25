@@ -38,13 +38,13 @@ class ClusterDetect:
 
             pred = lof.predict(shot_data_array)
             for l_pred, l_label, l_time in zip(pred, label, _time):
-                if l_pred == -1 and label != 0:
+                if l_pred == -1 and l_label != 0:
                     self.truepos_list.append(l_time)
-                elif l_pred == -1 and label == 0:
+                elif l_pred == -1 and l_label == 0:
                     self.falsepos_list.append(l_time)
-                elif l_pred == 1 and label != 0:
+                elif l_pred == 1 and l_label == 0:
                     self.trueneg_list.append(l_time)
-                elif l_pred == 1 and label == 0:
+                elif l_pred == 1 and l_label != 0:
                     self.falseneg_list.append(l_time)
         all_pos_list = self.truepos_list + self.falsepos_list
         self.deviant_data = pd.DataFrame(self.detect_data[self.detect_data['time'].isin(all_pos_list)])
@@ -55,7 +55,7 @@ class ClusterDetect:
         self.label_list = []
         self.time_list = []
         for cluster in self.cluster_array:
-            self.shot_data = pd.DataFrame(columns=['time', 'anormaly'])
+            self.shot_data = pd.DataFrame(columns=['time', 'anormal'])
             shot_dict = {}
             canid_set = set()
             for segment in cluster:
@@ -89,7 +89,7 @@ class ClusterDetect:
                 for merge_colum in merge_column_list:
                     column_name1 = 'data' + merge_colum[0]
                     column_name2 = 'data' + merge_colum[1]
-                    self.shot_data.loc[:, ['data' + merge_colum]] = \
+                    self.shot_data['data' + merge_colum] = \
                         self.shot_data.loc[:, [column_name1]].values + \
                         self.shot_data.loc[:, [column_name2]].values
                     self.shot_data.drop(columns=[column_name1, column_name2], inplace=True)
@@ -100,7 +100,7 @@ class ClusterDetect:
                 lambda x: x.astype(str).map(lambda x: int(x, base=16)))
 
             self.shot_data = self.shot_data.replace(-1, np.nan)
-
+            self.shot_data.sort_values(by=['time'], inplace=True)
             self.shot_data.interpolate(method='pad', inplace=True)
 
             self.shot_data.dropna(inplace=True)

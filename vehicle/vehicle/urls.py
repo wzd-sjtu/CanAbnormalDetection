@@ -26,6 +26,7 @@ urlpatterns = [
     path('work/rules/', views.rules),
     path('work/rules/uniqueid', views.uniqueid),
     path('parse/', views.parse),
+    path('parse/lstm', views._parse_lstm),
     path('parse/sequence/', views._parse_sequence),
     path('parse/datafield/', views._parse_datafield),
     path('detect/', views.detect),

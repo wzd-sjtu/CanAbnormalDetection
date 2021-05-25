@@ -51,7 +51,7 @@ class ParseCluster:
             for merge_colum in merge_column_list:
                 column_name1 = 'data' + merge_colum[0]
                 column_name2 = 'data' + merge_colum[1]
-                self.data_matrix.loc[:, ['data' + merge_colum]] = \
+                self.data_matrix['data' + merge_colum] = \
                     self.data_matrix.loc[:, [column_name1]].values + self.data_matrix.loc[:, [column_name2]].values
                 self.data_matrix.drop(columns=[column_name1, column_name2], inplace=True)
 
@@ -113,9 +113,12 @@ class ParseCluster:
         self.fit_model()
 
     def get_cluster(self):
+        np.save('cluster_array.npy',self.cluster_array)
         return self.cluster_array
 
     def get_model(self):
+        with open('lof_list', 'wb') as f:
+            pickle.dump(self.lof_list, f)
         return self.lof_list
 
     def generate_snapshoot(self):
@@ -154,7 +157,7 @@ class ParseCluster:
                 for merge_colum in merge_column_list:
                     column_name1 = 'data' + merge_colum[0]
                     column_name2 = 'data' + merge_colum[1]
-                    self.shot_data.loc[:, ['data' + merge_colum]] = \
+                    self.shot_data['data' + merge_colum] = \
                         self.shot_data.loc[:, [column_name1]].values + \
                         self.shot_data.loc[:, [column_name2]].values
                     self.shot_data.drop(columns=[column_name1, column_name2], inplace=True)
@@ -165,7 +168,7 @@ class ParseCluster:
                 lambda x: x.astype(str).map(lambda x: int(x, base=16)))
 
             self.shot_data = self.shot_data.replace(-1, np.nan)
-
+            self.shot_data.sort_values(by=['time'], inplace=True)
             self.shot_data.interpolate(method='pad', inplace=True)
 
             self.shot_data.dropna(inplace=True)
@@ -179,7 +182,6 @@ class ParseCluster:
             lof = LocalOutlierFactor(novelty=True)
             lof.fit(shot_data_array)
             y = lof.predict(shot_data_array)
-
             self.lof_list.append(lof)
 
 

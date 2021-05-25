@@ -153,7 +153,7 @@ class ParseData:
                 tmp_result = Classfy_Results()
                 tmp_result.classfy_begin_loc = 8 * i
                 tmp_result.classfy_length = 8
-                tmp_result.classfy_class = self.checksum_tag
+                tmp_result.classfy_class = CHECKSUM_TAG
                 tmp_result.classfy_score = self.number_data_frame.size
                 self.final_res.append(tmp_result)
 
@@ -170,7 +170,7 @@ class ParseData:
                     tmp_result = Classfy_Results()
                     tmp_result.classfy_begin_loc = 8 * i
                     tmp_result.classfy_length = 8
-                    tmp_result.classfy_class = self.sensor_tag
+                    tmp_result.classfy_class = SENSOR_TAG
                     tmp_result.classfy_value_store = [data_min, data_max, grad]
                     tmp_result.classfy_score = len(diverse_value_set)
                     self.sensor_res.append(tmp_result)
@@ -204,7 +204,7 @@ class ParseData:
                             tmp_result = Classfy_Results()
                             tmp_result.classfy_begin_loc = 8 * (i - 1)
                             tmp_result.classfy_length = 16
-                            tmp_result.classfy_class = self.sensor_tag
+                            tmp_result.classfy_class = SENSOR_TAG
                             tmp_result.classfy_value_store = [data_min, data_max, grad]
                             tmp_result.classfy_score = len(set(self.number_data_frame['sum']))
                             self.final_res.append(tmp_result)
@@ -289,14 +289,14 @@ class ParseData:
             # self.run_time('2 time: ')
             if len(diverse_value_set) == 1:
                 # classfy_result.classfy_class = "const"
-                classfy_result.classfy_class = self.const_tag
+                classfy_result.classfy_class = CONST_TAG
                 classfy_result.classfy_score = length
 
                 classfy_result.classfy_value_store = list(diverse_value_set)
 
             elif self.is_counter(sec_data_list, length, begin_loc):
 
-                classfy_result.classfy_class = self.counter_tag
+                classfy_result.classfy_class = COUNTER_TAG
                 classfy_result.classfy_score = length
 
                 classfy_result.classfy_value_store = []
@@ -309,7 +309,7 @@ class ParseData:
 
                 #
                 # 在这里是传感器？
-                classfy_result.classfy_class = self.sensor_tag
+                classfy_result.classfy_class = SENSOR_TAG
                 classfy_result.classfy_score = (len(s) * len(s) / 2 ** length)
 
                 classfy_result.classfy_value_store = []
@@ -326,14 +326,14 @@ class ParseData:
             # elif len(s) <= min(2**(0.5*length), 12):
             elif len(diverse_value_set) <= min(2 ** (0.5 * length), 12) and length >= 3:
                 # classfy_result.classfy_class = "multi-value"
-                classfy_result.classfy_class = self.multi_value_tag
+                classfy_result.classfy_class = MULTI_VALUE_TAG
                 classfy_result.classfy_score = length
 
                 # classfy_result.classfy_value_type = 0
                 classfy_result.classfy_value_store = list(diverse_value_set)
 
             else:
-                classfy_result.classfy_class = self.no_meaning_tag
+                classfy_result.classfy_class = NO_MEANING_TAG
                 classfy_result.classfy_score = length
                 classfy_result.classfy_value_store = []
             # self.run_time('3 time: ')
@@ -348,21 +348,21 @@ class ParseData:
                 for classfy_result in self.classfy_results_list:
                     if classfy_result.classfy_begin_loc >= begin_loc and \
                             classfy_result.classfy_length + classfy_result.classfy_begin_loc - 1 <= end_loc:
-                        if classfy_result.classfy_class == self.const_tag:
+                        if classfy_result.classfy_class == CONST_TAG:
                             if self.const_class is None:
                                 self.const_class = classfy_result
                             else:
                                 if self.const_class.classfy_score < classfy_result.classfy_score:
                                     self.const_class = classfy_result
 
-                        elif classfy_result.classfy_class == self.counter_tag:
+                        elif classfy_result.classfy_class == COUNTER_TAG:
                             if self.counter_class is None:
                                 self.counter_class = classfy_result
                             else:
                                 if self.counter_class.classfy_score < classfy_result.classfy_score:
                                     self.counter_class = classfy_result
 
-                        elif classfy_result.classfy_class == self.multi_value_tag:
+                        elif classfy_result.classfy_class == MULTI_VALUE_TAG:
                             if self.multi_value_class is None:
                                 self.multi_value_class = classfy_result
                             else:
@@ -370,7 +370,7 @@ class ParseData:
                                     self.multi_value_class = classfy_result
 
 
-                        elif classfy_result.classfy_class == self.no_meaning_tag:
+                        elif classfy_result.classfy_class == NO_MEANING_TAG:
                             if self.no_meaning_class is None:
                                 self.no_meaning_class = classfy_result
                             else:
@@ -383,7 +383,8 @@ class ParseData:
                                  self.counter_class,
                                  self.multi_value_class,
                                  self.no_meaning_class)
-            self.final_res.append(tmp_res)
+            if tmp_res.classfy_class != NO_MEANING_TAG:
+                self.final_res.append(tmp_res)
             if tmp_res is None:
                 print(self.can_id)
             # print("i am happy:::  " + str(tmp_res.classfy_class))
@@ -437,7 +438,7 @@ class ParseData:
         tmp_classfy_data.classfy_begin_loc = 0
         tmp_classfy_data.classfy_length = self.bit_length
         tmp_classfy_data.classfy_score = self.bit_length
-        tmp_classfy_data.classfy_class = self.const_tag
+        tmp_classfy_data.classfy_class = CONST_TAG
         tmp_classfy_data.classfy_value_store = [0]
         self.final_res.append(tmp_classfy_data)
 
@@ -478,22 +479,21 @@ class ParseData:
 
     def to_dataframe(self):
 
-        index_arrays = [np.array(self.id_list), np.array(self.type_list)]
-        index_tuple = list(zip(*index_arrays))
-        index = pd.MultiIndex.from_tuples(index_tuple, names=['can_id', 'type'])
+        # index_arrays = [np.array(self.id_list), np.array(self.type_list)]
+        # index_tuple = list(zip(*index_arrays))
+        # index = pd.MultiIndex.from_tuples(index_tuple, names=['can_id', 'type'])
 
-        data_matrix = np.array([self.begin_loc_list, self.length_list, self.score_list,
+        data_matrix = np.array([self.type_list, self.begin_loc_list, self.length_list, self.score_list,
                                 self.value_store_list],dtype=object)
 
-        self.result_frame = pd.DataFrame(data_matrix.T, index=index,
-                                         columns=['begin_loc', 'length', 'score', 'value_list'])
-        self.result_frame.drop(index=5, level='type', inplace=True)
-        return self.result_frame
+        self.result_frame = pd.DataFrame(data_matrix.T, index=self.id_list,
+                                         columns=['type', 'begin_loc', 'length', 'score', 'value_list'])
+        self.result_frame.to_pickle('_parse_rule.pkl')
 
     def get_sensor(self):
         sensor_dict = {}
         for i in range(len(self.type_list)):
-            if self.type_list[i] == self.sensor_tag:
+            if self.type_list[i] == SENSOR_TAG:
                 canid = self.id_list[i]
                 begin_byte = self.begin_loc_list[i] // 8
                 if self.length_list[i] == 16:
@@ -504,5 +504,6 @@ class ParseData:
                     sensor_dict[canid].append(byte_name)
                 else:
                     sensor_dict[canid] = [byte_name]
+
         return sensor_dict
 

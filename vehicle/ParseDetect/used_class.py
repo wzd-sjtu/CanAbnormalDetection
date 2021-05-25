@@ -16,11 +16,11 @@ MULTI_VALUE_TAG = 4
 NO_MEANING_TAG = 5
 
 type_dict = {
-    str(0):'校验和',
-    str(1):'传感器',
-    str(2):'常值',
-    str(3):'计数器',
-    str(4):'多值',
+    0:'校验和',
+    1:'传感器',
+    2:'常值',
+    3:'计数器',
+    4:'多值',
 }
 
 class Single_Data:

@@ -1,4 +1,21 @@
-# 用以存放解析数据的函数
+from typing import Pattern
+import numpy
+
+import pandas as pd
+
+from pandas import DataFrame
+
+from keras.models import Sequential
+
+from keras.layers import Dense
+
+from keras.layers import LSTM
+
+from keras.utils import np_utils
+
+from keras.preprocessing.sequence import pad_sequences
+
+
 def seq_id_statistics(id_list):
     """ 计算id序列的基本能统计特征：出现次数、平均周期、周期上下限，
         返回id的上述特征的字典 """
@@ -110,3 +127,51 @@ def parse_seq_cos_sim(global_data):
     minCS = min(CSlist)
     maxCS = max(CSlist)
     return [minCS, maxCS]
+
+
+def set_detect_seq_lstm(alphabet):
+    # define the raw dataset
+    # filepath =r"C:\Users\plw\Desktop\target_res(1).csv"
+    # testflight = pd.read_csv(filepath)
+    # alphabet = testflight["y"]
+    # anomalies = []
+
+    # alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    # create mapping of characters to integers (0-25) and the reverse
+    char_to_int = dict((c, i) for i, c in enumerate(alphabet))
+    int_to_char = dict((i, c) for i, c in enumerate(alphabet))
+    # prepare the dataset of input to output pairs encoded as integers
+    num_inputs = 1000
+    max_len = 100
+    dataX = []
+    dataY = []
+    for i in range(num_inputs):
+        start = numpy.random.randint(len(alphabet) - 2)
+        end = numpy.random.randint(start, min(start + max_len, len(alphabet) - 1))
+        sequence_in = alphabet[start:end + 1]
+        sequence_out = alphabet[end + 1]
+        dataX.append([char_to_int[char] for char in sequence_in])
+        dataY.append(char_to_int[sequence_out])
+        print(sequence_in, '->', sequence_out)
+    # convert list of lists to array and pad sequences if needed
+    X = pad_sequences(dataX, maxlen=max_len, dtype='float32')
+    # reshape X to be [samples, time steps, features]
+    X = numpy.reshape(X, (X.shape[0], max_len, 1))
+    # normalize
+    X = X / float(len(alphabet))
+    # one hot encode the output variable
+    y = np_utils.to_categorical(dataY)
+    # create and fit the model
+    batch_size = 1
+    model = Sequential()
+    model.add(LSTM(32, input_shape=(X.shape[1], 1)))
+    model.add(Dense(y.shape[1], activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.fit(X, y, epochs=1, batch_size=batch_size, verbose=2)
+    # summarize performance of the model
+    scores = model.evaluate(X, y, verbose=0)
+    PATH = "../vehicle/LSTMModel"
+    model.save(PATH+'/model/')
+    print("Model Accuracy: %.2f%%" % (scores[1] * 100))
+    # demonstrate some model predictions
+    return  '训练完成' # html中通过 {{ dano.0 }} 调用此变量
