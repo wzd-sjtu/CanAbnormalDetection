@@ -4,3 +4,6 @@
 /vehicle/lof_list
 /CanSrcLoc/*
 /CanConstruct/src/*
+/genarateAbnormalData/*
+/ParsingTargetDataframe/src/*
+CanConstruct.rar

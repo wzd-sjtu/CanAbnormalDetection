@@ -53,13 +53,13 @@ def binary_str_to_hex_str(binary_str):
         tmp = tmp + bin2hex_map[binary_str[i:i+4]]
     return tmp
 
-
 class CAN_DATA:
     type_name = None
     subnet = None  # subnet is somehow not necessary
     df = pd.DataFrame()
 
 # 调用格式：cutting_data_into_standard_style(Logging0, asc)  默认寻找目录是在source文件夹下面的
+# 这个函数是处理实车数据的，谨记之
 def cutting_data_into_standard_style(file_name, file_type, output_file_name):  #速度基准，处理12mb数据，大约需要7-8分钟
     f = open('./src/' + file_name + '.' + file_type, 'r')
 
@@ -176,7 +176,7 @@ def cutting_data_into_standard_style(file_name, file_type, output_file_name):  #
     f.close()
     # 边读边写，提高运行效率efficiency
 
-
+# 这个函数是处理通信矩阵数据的
 def exchange_data(target_path, res_path):
     time_plus = None
     type_name = None
@@ -240,7 +240,6 @@ if __name__ == '__main__':
     t_cut3 = multiprocessing.Process(target=cutting_data_into_standard_style, args=("{LoggingBlock3}", "asc", "test3.csv"))
     t_cut4 = multiprocessing.Process(target=cutting_data_into_standard_style, args=("{LoggingBlock4}", "asc", "test4.csv"))
     # cutting_data_into_standard_style("{LoggingBlock1}", "asc", "test1.csv")
-    # 给我跑起来哦，多进程
 
     t_cut1.start()
     t_cut2.start()
@@ -264,5 +263,6 @@ if __name__ == '__main__':
     t_cut2.start()
     t_cut3.start()
     t_cut4.start()
+
 
 
