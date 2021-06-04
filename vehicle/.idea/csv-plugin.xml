@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\templates\base.html">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\vehicle\detect_funcs.py">
           <value>
             <Attribute>

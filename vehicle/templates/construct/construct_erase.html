@@ -57,20 +57,36 @@
                 id="make_insert_attack">生成攻击</button>
     </form>
 
-    <div class="container">
-      <h2>攻击数据展示</h2>
-      <p></p>
-      <table class="table" id="attack_description_div">
-        <thead style="color:white">
-          <tr>
-                <th>time</th>
-                <th>id</th>
-                <th>data_in_hex</th>
-                <th>description</th>
-          </tr>
-        </thead>
 
-      </table>
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>异常数据展示</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto" id="attack_description_div">
+                            <thead style="color:white">
+                                <tr>
+                                    <th>时间time</th>
+                                    <th>can报文id</th>
+                                    <th>十六进制数据</th>
+                                    <th>攻击描述</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                <br>
+            </div>
+        </ul>
     </div>
 
 
@@ -113,15 +129,16 @@
                         //console.log(target_list);
                         // 这里我们需要把文件修改为方便的json格式，需要自己生成？
                         // 好痛苦哇
+                        var tbody = "<tbody  style=\"padding: 5px 5px; height: 400px\">";
+                        var tmp  = "";
                         for(var i=0; i<n; i++) {
                             // 下面需要构建报文
                             var time_loc = "time" + i;
                             var can_id_loc = "can_id" + i;
                             var data_loc = "data_in_hex" + i;
-                            var description_loc = "erase_attack";
+                            var description_loc = "description" + i;
 
-                            var tbody = "<tbody style=\"color:greenyellow\"><tr>";
-                            var tmp = "";
+                            tmp = tmp + "<tr>";
                             tmp = tmp+"<td>";
                             tmp = tmp + target_list[time_loc] + "</td>";
                             tmp = tmp+"<td>";
@@ -130,12 +147,12 @@
                             tmp = tmp + target_list[data_loc] + "</td>";
                             tmp = tmp+"<td>";
                             tmp = tmp + target_list[description_loc] + "</td>";
-                            var tbody_end = "</tr><tbody>";
-                            $('#attack_description_div').append(tbody+tmp+tbody_end);
+
+                            tmp = tmp + "</tr>";
                         }
-                        if(n==0) {
-                            var tbody = "<tbody style=\"color:greenyellow\"><tr>";
-                            var tmp = "";
+
+                        if(n == 0) {
+                            tmp = tmp + "<tr>";
                             tmp = tmp+"<td>";
                             tmp = tmp + "id is not proper or time is too less" + "</td>";
                             tmp = tmp+"<td>";
@@ -144,9 +161,12 @@
                             tmp = tmp + "id is not proper or time is too less" + "</td>";
                             tmp = tmp+"<td>";
                             tmp = tmp + "id is not proper or time is too less" + "</td>";
-                            var tbody_end = "</tr><tbody>";
-                            $('#attack_description_div').append(tbody+tmp+tbody_end);
+                            tmp = tmp + "</tr>";
                         }
+
+                        var tbody_end = "</tbody>";
+
+                        $('#attack_description_div').append(tbody+tmp+tbody_end);
                     }
                 })
             })
