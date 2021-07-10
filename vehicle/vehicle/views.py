@@ -344,7 +344,6 @@ def _construct_reput_single(request):
 def _construct_reput_all(request):
     return render(request, 'construct/construct_reput_all.html', {'targetChoics': allCanIdList})
 # 一般来说，重放攻击的代码量是比较小的，远远没有现在这么大的
-# 这里写的可视化过程是非常复杂的，某种程度上来说，是难以理解的
 def reput_attack(request):
     if request.is_ajax():
         print(request.POST)
