@@ -11,3 +11,5 @@ documents 系统设计文档
 ParsingTargetDataframe 数据处理类
 
 vehicle django框架+整个项目所有组件的结合体
+
+![image](https://user-images.githubusercontent.com/46391254/125766328-3b64df82-c49f-465f-8f94-b59408d8226f.png)
