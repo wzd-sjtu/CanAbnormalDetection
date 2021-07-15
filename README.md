@@ -12,3 +12,4 @@ ParsingTargetDataframe 数据处理类
 
 vehicle django框架+整个项目所有组件的结合体
 
+![webpage](https://user-images.githubusercontent.com/46391254/125771059-2f14fac0-e918-4a9c-b6de-2d8944a288df.png)
