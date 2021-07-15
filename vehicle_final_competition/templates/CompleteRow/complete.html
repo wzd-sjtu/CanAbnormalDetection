@@ -44,15 +44,14 @@
                  style="margin:25px auto;">
                 <div class="col-md-1"></div>
                 <div class="col-md-3"
-                    style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
-                            background-size:100% 100%;height:150px;">
+                    style=" border-radius: 20px;
+                            background-size:100% 100%;height:100%;">
 
                     <h1 style="font-size:25px;color:cornflowerblue;
-                    text-align: center;"> 报文周期格式检测 </h1>
+                    text-align: center;margin:50px auto;"> 报文序列格式检测 </h1>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-3">
-
                     <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false"
                             style="color:deepskyblue;background-color: rgba(0,0,0,0.5);border-radius: 20px;
                                     margin:50px auto;width:100px;" id="first_button">
@@ -60,7 +59,6 @@
                     </button>
                 </div>
                 <div class="col-md-3" id="first_span">
-
                     <span class="demoSpan2" style="margin:50px;">
                     </span>
                 </div>
@@ -80,10 +78,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-            <div>
-                <br>
-                <br>
             </div>
         </ul>
         </div>
@@ -106,11 +100,11 @@
                  style="margin:25px auto;">
                 <div class="col-md-1"></div>
                 <div class="col-md-3"
-                    style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
+                    style="border-radius: 20px;
                             background-size:100% 100%;height:150px;">
 
                     <h1 style="font-size:25px;color:cornflowerblue;
-                    text-align: center;"> 报文周期格式检测 </h1>
+                    text-align: center;margin:50px auto;"> 报文序列关联性检测 </h1>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-3">
@@ -143,10 +137,6 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <br>
-                <br>
-            </div>
         </ul>
         </div>
 
@@ -171,11 +161,11 @@
                  style="margin:25px auto;">
                 <div class="col-md-1"></div>
                 <div class="col-md-3"
-                    style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
+                    style="border-radius: 20px;
                             background-size:100% 100%;height:150px;">
 
                     <h1 style="font-size:25px;color:cornflowerblue;
-                    text-align: center;"> 报文周期格式检测 </h1>
+                    text-align: center;margin:auto 50px;"> 数据域格式检测 </h1>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-3">
@@ -208,10 +198,6 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <br>
-                <br>
-            </div>
         </ul>
         </div>
 
@@ -234,11 +220,11 @@
                  style="margin:25px auto;">
                 <div class="col-md-1"></div>
                 <div class="col-md-3"
-                    style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;
+                    style="border-radius: 20px;
                             background-size:100% 100%;height:150px;">
 
                     <h1 style="font-size:25px;color:cornflowerblue;
-                    text-align: center;"> 报文周期格式检测 </h1>
+                    text-align: center;margin:50px auto;"> 数据域关联性检测 </h1>
                 </div>
                 <div class="col-md-2"></div>
                 <div class="col-md-3">
@@ -277,22 +263,17 @@
             </div>
         </ul>
         </div>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
+
     </div>
     {% csrf_token %}
 
     <script src="/static/js/jquery-3.5.1.min.js"></script>
+    <!-- 这里具体的逻辑处理部分是不需要大修改的 -->
     <script>
         // 这里书写了一小部分数据的交互过程
         $(function() {
             $("#first_button").click(function() {
-                var tmp = $('#first_span');
-                tmp.empty();
+
 
                 var formdata = new FormData();
                 var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
@@ -359,18 +340,20 @@
                         var tbody_end = "</tbody>";
 
                         $('#first_table').append(tbody+tmp+tbody_end);
+
+                        var tmp_tar = $('#first_span');
+                        tmp_tar.empty();
+
+                        var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                        tmp_tar.append(data);
                     }
                 });
 
-                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
-                tmp.append(data);
             })
         });
 
         $(function() {
             $("#second_button").click(function() {
-                var tmp = $('#second_span');
-                tmp.empty();
                 // <span class="demoSpan2" style="margin:50px;"></span>
                 // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
                 var formdata = new FormData();
@@ -438,19 +421,21 @@
                         var tbody_end = "</tbody>";
 
                         $('#second_table').append(tbody+tmp+tbody_end);
+
+                        var tmp_tar = $('#second_span');
+                        tmp_tar.empty();
+
+                        var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                        tmp_tar.append(data);
                     }
                 });
 
-                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
-                tmp.append(data);
             })
         });
 
 
         $(function() {
             $("#third_button").click(function() {
-                var tmp = $('#third_span');
-                tmp.empty();
 
                 var formdata = new FormData();
                 var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
@@ -517,21 +502,22 @@
                         var tbody_end = "</tbody>";
 
                         $('#third_table').append(tbody+tmp+tbody_end);
-                    }
-                });
-                // <span class="demoSpan2" style="margin:50px;"></span>
-                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
 
-                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
-                tmp.append(data);
+                        var tmp_tar = $('#third_span');
+                        tmp_tar.empty();
+
+                        var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                        tmp_tar.append(data);
+                    }
+
+                });
             })
         });
 
 
         $(function() {
             $("#fourth_button").click(function() {
-                var tmp = $('#fourth_span');
-                tmp.empty();
+
 
                 var formdata = new FormData();
                 var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
@@ -598,13 +584,16 @@
                         var tbody_end = "</tbody>";
 
                         $('#fourth_table').append(tbody+tmp+tbody_end);
+
+                        // 函数貌似是并行的？
+                        var tmp_tar = $('#fourth_span');
+                        tmp_tar.empty();
+
+                        var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
+                        tmp_tar.append(data);
                     }
                 });
-                // <span class="demoSpan2" style="margin:50px;"></span>
-                // 之后会在这里调用一个ajax与后端进行交互，内容是合理的
 
-                var data = "<span class=\"demoSpan1\" style=\"margin:50px;\"></span>";
-                tmp.append(data);
             })
         });
     </script>

@@ -611,7 +611,9 @@ def complete_system(request):
 
 
 def first_detect(request):
-    # 这里涉及到了攻击的制造，需要写很多代码？
+    # 这里涉及到了攻击的制造
+    # 不知道会用到什么代码呢？
+
     target_list = {}
     if request.is_ajax():
         file = open("./vehicle/seq_features_stor", "rb")
@@ -634,7 +636,7 @@ def first_detect(request):
         ano2 = df.detect_seq_id_survival_rate(datas, features[0].SR)
         # ano3 = [[int(cnt / time_itv), [initTime, text[0]],  cs], ...]
         ano3 = df.detect_seq_cos_sim(datas, features[0].cosSim)
-        print(ano3)
+        # print(ano3)
 
         # generate total des list
         total_ano = []  # [[id, time, des], ...]
@@ -693,7 +695,7 @@ def second_detect(request):
             description_loc = "description" + str(i)
             target_dict[description_loc] = detect_ano[i][2]
         response = JsonResponse(target_dict)
-        print(length)
+        # print(length)
         return response
 
     # 这里涉及到了攻击的制造，需要写很多代码？
