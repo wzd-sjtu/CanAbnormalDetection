@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+
+<!-- 只要保证最后的读写内容是一个就可以了，还是比较easy的 随时可以修改内容！ -->
+<!-- 还有一些致命的跳转问题，某种程度上来说，并不算是严重的跳转问题喽 -->
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent;text-align: center;">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+            <li><a href="/construct" style="color: #afd9ee"><strong>Construct</strong></a></li>
+            <li><a href="/construct/reput" style="color: #afd9ee"><strong>Reput Attack</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+<!-- 需要制造一个可以选择攻击的部分？ -->
+{% block construct_reput %}
+    <!--
+    <div class="jumbotron"
+         style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;">
+      <h1 style="font-size:25px;color:cornflowerblue;text-align: center;">   重放某个消息的报文？</h1>
+      <p></p>
+      <p><a class="btn btn-primary btn-lg" href="/construct/construct_reput_single" role="button"
+            style="background-color: transparent;color:navajowhite;text-align: center;
+                    margin:auto;width:100%;">点击这里</a></p>
+    </div>
+    -->
+
+    <!-- 写法要尽量简洁，从而最大程度上提高效率 -->
+    <div class="mx-auto tm-border-top gallery-slider">
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="intro-left tm-bg-dark" style="height: 100%">
+                    <h1 class="mb-4" style="text-align: center"><a href='/construct/construct_reput_single'>重放单个ID报文</a></h1>
+                    <p class="mb-4" style="font-size: large">
+                        </br>
+                        重放某个ID对应的报文
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="intro-left tm-bg-dark" style="height: 100%">
+                    <h1 class="mb-4" style="text-align: center"><a href='/construct/construct_reput_all'>重放所有ID报文</a></h1>
+                    <p class="mb-4" style="font-size: large">
+                        </br>
+                        重放所有ID对应的报文
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
+    <div class="jumbotron" style="background-image:url(/static/CanConstructImg/awsomeThing.jpg); border-radius: 20px;">
+      <h1 style="font-size:25px;color:cornflowerblue;text-align: center;">   重放一小段时间的所有报文？</h1>
+      <p></p>
+      <p><a class="btn btn-primary btn-lg" href="/construct/construct_reput_all" role="button"
+            style="background-color: transparent;color:navajowhite;text-align: center;
+                    margin:auto;width:100%;">点击这里</a></p>
+    </div>
+    -->
+
+{% endblock %}

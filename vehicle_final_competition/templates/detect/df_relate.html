@@ -1,0 +1,113 @@
+<style type="text/css">
+    table {
+        border-collapse: collapse;
+    }
+
+    table tbody {
+        display: block;
+        height: 500px;
+        overflow-y: scroll;
+        font-size: large;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    table thead,
+    tbody tr {
+        display: table;
+        width: 99.99%;
+        /* 如果此处写100%会出现横向滚动条 */
+        table-layout: fixed;
+    }
+
+    table td {
+        border-bottom-width: 1px;
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+        padding: 3px;
+    }
+
+    table thead {
+        width: calc(100% - 1em);
+        font-size: large;
+    }
+
+    table thead th {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 10px 3px;
+    }
+
+    table tbody::-webkit-scrollbar {
+        width: 24px;
+    }
+
+    table tbody::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 3px;
+    }
+
+    table tbody::-webkit-scrollbar-track {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    table tbody::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    table tbody::-webkit-scrollbar-thumb:active {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+</style>
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/"><strong>Home</strong></a></li>
+            <li><a href="/detect"><strong>Detect</strong></a></li>
+            <li><a href="/detect/datafieldRelationship" style="color: #afd9ee"><strong>Datafield Relationship</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+{% block detect_data_cluster %}
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>聚类分析检测</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>时间</th>
+                                <th>CANID</th>
+                                <th>数据</th>
+                                <th>错误描述</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for index,row in datafield_deviant.iterrows %}
+                                <tr>
+                                    <td>{{ row.time }}</td>
+                                    <td>{{ row.can_id }}</td>
+                                    <td>{{ row.data_in_hex }}</td>
+                                    <td>{{ row.Description }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Detect";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Detect";
+    </script>
+{% endblock %}

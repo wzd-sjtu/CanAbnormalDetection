@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="web_title">CAN_IDS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+{#    <link rel="stylesheet" href="/static/css/font-awesome.min.css">#}
+    <link rel="stylesheet" href="/static/css/slick.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/templatemo-style.css">
+    <link rel="stylesheet" href="/static/SideColum/css/leftSide.css">
+
+    <!-- 这里有一些简单的CSS信息 -->
+    <style type="text/css">
+        body {
+            background-image: url(/static/img/tm-astro-bg.jpg);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        input {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px; /*css3属性IE不支持*/
+            padding: 7px 0px 7px 5px;
+        }
+
+        button.submit {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px; /*css3属性IE不支持*/
+            padding: 7px 0px 7px 5px;
+        }
+    </style>
+
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+
+        table tbody {
+            display: block;
+            height: 500px;
+            overflow-y: scroll;
+            font-size: large;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        table thead,
+        tbody tr {
+            display: table;
+            width: 99.99%;
+            /* 如果此处写100%会出现横向滚动条 */
+            table-layout: fixed;
+        }
+
+        table td {
+            border-bottom-width: 1px;
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+            padding: 3px;
+        }
+
+        table thead {
+            width: calc(100% - 1em);
+            font-size: large;
+        }
+
+        table thead th {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 3px;
+        }
+
+        table tbody::-webkit-scrollbar {
+            width: 24px;
+        }
+
+        table tbody::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+        }
+
+        table tbody::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        table tbody::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        table tbody::-webkit-scrollbar-thumb:active {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+
+    <!-- 侧边栏的js代码 -->
+    <script type="text/javascript">
+	/*打开侧栏，修改侧栏宽度，主体左跨度、背景透明度*/
+	function openNav() {
+    	document.getElementById("mySidenav").style.width = "250px";
+		document.getElementById("main").style.marginLeft = "250px";
+    	document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+	}
+
+	/*关闭侧栏，恢复原始侧栏宽度，主体左跨度、背景透明度*/
+	function closeNav() {
+		document.getElementById("mySidenav").style.width = "0";
+		document.getElementById("main").style.marginLeft= "0";
+	}
+
+	function openAttackData() {
+	    document.getElementById("myAnormalData").style.width = "900px";
+		document.getElementById("main").style.marginLeft = "900px";
+    	document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+    }
+    function closeAttackData() {
+		document.getElementById("myAnormalData").style.width = "0";
+		document.getElementById("main").style.marginLeft= "0";
+	}
+	</script>
+    <!--
+
+    TemplateMo 560 Astro Motion
+
+    https://templatemo.com/tm-560-astro-motion
+
+    -->
+</head>
+
+<body>
+
+<!-- 直接写在这些地方会造成大量冲突，从而代码无法继续运行下去？简单的写导航栏是稍有点复杂的-->
+
+<div id="mySidenav" class="sidenav">
+  <!-- 侧边页面选择框 -->
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <form role="form" style="text-align: center;font-size:12px;">
+        {% csrf_token %}
+        <!-- 这里的诸多攻击方式，应当如何快速处理呢？ -->
+        <!-- height，line-height，padding和font-size -->
+        <div class="form-group" id="attack_type">
+            <!-- 之所以不显示，是因为这里的表单发生了冲突，并且冲突无法解决 -->
+            <label style="size:12px;">请选择想要的攻击方式</label>
+                <br/>
+                    <label>
+                    <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                    border-color: greenyellow;border-radius: 10px;text-align: center;"
+                        id="side_colum_chose_attack_type">
+                        <option style="color:black">注入攻击</option>
+
+                        <option style="color:black">重放攻击单ID</option>
+                        <option style="color:black">重放攻击多ID</option>
+                        <option style="color:black">欺骗攻击</option>
+                        <option style="color:black">Fuzz攻击</option>
+                    </select>
+                </label>
+        </div>
+
+        <div class="form-group">
+            <label for="name">攻击持续时间（s）</label><br/>
+            <input  id="side_colum_attack_exist_time" style="color:white;
+                        background-color: transparent;size:100px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;
+                        text-align: center;">
+        </div>
+
+        <div class="form-group" id="insert id" >
+        <label>选择攻击的报文id</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="side_colum_chose_id">
+                    <!-- 本质上这里循环or不循环是无所谓的 -->
+                    {% for item in targetChoics %}
+                        <option style="color:black">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="form-group" id="" >
+
+        <button type="button" class="btn btn-default"
+            style="color:white;background-color: transparent;font-size:18px;
+                    size:100px;height:50px;border-color: greenyellow;border-radius: 10px;"
+                id="side_colum_make_attack">生成攻击</button>
+        </div>
+        <br/><br/>
+
+        <br/><br/>
+
+        <div class="form-group">
+            <label for="name">如果是注入攻击或Fuzz攻击的话，请输入周期（s）</label><br/>
+            <input  id="side_colum_attack_circle_time" style="color:white;
+                        background-color: transparent;size:100px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;
+                        text-align: center;">
+        </div>
+
+
+    </br>
+    </br>
+    </br>
+        <div class="form-group" id="" >
+        <label>如果是欺骗攻击，请选择种类</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="side_colum_datafield_chose_attack_method">
+                    <option style="color:black"> </option>
+                    <option style="color:black">随机修改</option>
+                    <option style="color:black">定值或多值字段修改</option>
+                    <option style="color:black">传感器字段修改</option>
+                </select>
+            </label>
+        </div>
+
+
+    <div class="form-group" id="insert id" >
+        <label>如果是传感器字段修改Sensor，请选择种类</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="side_colum_sensor_attack_type">
+                    <option style="color:black">未选择</option>
+                    <option style="color:black">最大值</option>
+                    <option style="color:black">最小值</option>
+                    <option style="color:black">随机值</option>
+                    <option style="color:black">冗余小选项</option>
+                </select>
+            </label>
+        </div>
+
+
+    </form>
+
+</div>
+<div id="myAnormalData" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeAttackData()">&times;</a>
+    <!-- 这里专门用于存放内容的，需要填入一个表格？对滴 可能还用到了AJAX！，直接从后台请求数据 -->
+    <div class="mx-auto tm-border-top gallery-slider">
+        <div>
+            <table style="width:80%; margin: auto; " id="anormal_table">
+                <thead style="color:white">
+                    <tr>
+                        <th>时间time</th>
+                        <th>can报文id</th>
+                        <th>十六进制数据</th>
+                        <th>攻击描述</th>
+                    </tr>
+                </thead>
+                <!-- 每次打开，重新加载一下即可 -->
+
+            </table>
+        </div>
+    </div>
+</div>
+<!-- 头上的东西-->
+<div class="page-container" id="main">
+    <!-- 页眉和导航栏 -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div><a class="navbar-brand" style="font-family: 'Segoe Print';color: #ffffff"><h1 id="web_logo">
+                    CAN_IDS</h1></a></div>
+                {% block nav %} <!-- 这里的nav写法不太好？观感上不太漂亮-->
+                {% endblock %}
+            </div>
+
+        </div>
+    </div>
+    <!-- about按钮和attack choice按钮 -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="text-center" style="margin-top: 8%;;">
+                    <a class="btn btn-primary tm-bg-dark"
+                       style="font-size: large; color: #5cb85c;margin-left:2%;
+                       cursor:pointer" onclick="openNav()">
+                        &#9776; 攻击选项
+                    </a>
+
+                    <a class="btn btn-primary tm-bg-dark"
+                       style="font-size: large; color: #5cb85c;margin-left:2%;
+                       cursor:pointer" id="see_anormal_data">
+                        异常数据查看
+                    </a>
+
+                    <a href="/about" class="btn btn-primary tm-bg-dark" style="font-size: large; color: #5cb85c;margin-left:2%;">
+                        关于
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        </div>
+        </br>
+
+    <!-- 为页面的多态打下基础 -->
+    {% block home %}
+    {% endblock %}
+    {% block parse %}
+    {% endblock %}
+    {% block parse_sequence %}
+    {% endblock %}
+    {% block parse_datafield %}
+    {% endblock %}
+
+    {% block detect %}
+    {% endblock %}
+    {% block detect_seq %}
+    {% endblock %}
+    {% block detect_seq_rel %}
+    {% endblock %}
+    {% block construct %}
+    {% endblock %}
+
+    {% block about %}
+    {% endblock %}
+    {% block work %}
+    {% endblock %}
+    {% block contact %}
+    {% endblock %}
+
+    {% block construct_insert %}
+    {% endblock %}
+    {% block construct_erase %}
+    {% endblock %}
+    {% block construct_reput %}
+    {% endblock %}
+    {% block construct_changeDatafield %}
+    {% endblock %}
+    {% block completeSystem %}
+    {% endblock %}
+    <!-- 页脚 -->
+
+
+    <!-- <thead style="color:white"><tr><th>时间time</th><th>can报文id</th><th>十六进制数据</th><th>攻击描述</th></tr></thead>
+    -->
+
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto" id="side_effect_attack_description_div">
+
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                <br>
+            </div>
+        </ul>
+    </div>
+
+
+    <div class="footer-container">
+        <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+            <div class="container">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="#">Copy right from IDS</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<div id="loader-wrapper">
+    <div id="loader"></div>
+    <div class="loader-section section-left"></div>
+    <div class="loader-section section-right"></div>
+</div>
+
+<script src="/static/js/jquery-3.5.1.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/slick.js"></script>
+<script src="/static/js/templatemo-script.js"></script>
+<script src="/static/js/bootstrap.js"></script>
+<script src="/static/js/npm.js"></script>
+
+<!-- JS代码也插入在最后，提高效率efficiency喽 -->
+
+<!-- 涉及到了html页面ajax交互，写法还是比较基础的哦 -->
+<script>
+        // 经过一系列复杂操作，终于获得了正确的html js响应，但是还需要一些美化操作，现在的界面太挫了
+        // 美化操作应当如何快速完成呢？暂时是不清楚的
+        // 攻击数据的描述需要总是清晰地，才有利于数据的处理
+        $(function() {
+            // while循环中各种不同情况可以放到后台处理，是更加合理的
+            // 内容是合理的哦
+            $("#side_colum_make_attack").click(function() {
+                var formdata = new FormData();
+                // 获取提交的所有表单，是较为meaningful的小型化表单
+                formdata.append("chose_attack_type", $("#side_colum_chose_attack_type").val());
+                formdata.append("attack_exist_time", $("#side_colum_attack_exist_time").val());
+                formdata.append("chose_id", $("#side_colum_chose_id").val());
+
+                formdata.append("chose_cycle_time", $("#side_colum_attack_circle_time").val());
+                formdata.append("chose_datafield_attack_method", $("#side_colum_datafield_chose_attack_method").val());
+                formdata.append("sensor_attack_type", $("#side_colum_sensor_attack_type").val());
+                // formdata.append("")
+                var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
+                formdata.append("csrfmiddlewaretoken", token_of_csrf);
+                // 至此，信息都是完整的
+                $.ajax({
+                    url:"/attack_make",
+                    headers: {
+                        "X-CSRFToken":token_of_csrf
+                    },
+                    type:"post",
+                    data: formdata,
+                    dataType: 'JSON',
+                    cache:false,
+                    processData:false,
+                    contentType:false,
+                    success:function(target_list) {
+                        var n = target_list['size'];
+                        n = parseInt(n);
+                        //console.log(target_list);
+                        // 这里我们需要把文件修改为方便的json格式，需要自己生成？
+                        $('#side_effect_attack_description_div').empty();
+
+                        // <thead style="color:white"></thead>;
+                        var table = "<thead style=\"color:white\"><tr><th>时间time</th><th>can报文id</th><th>十六进制数据</th><th>攻击描述</th></tr></thead>";
+                        $('#side_effect_attack_description_div').append(table);
+                        var tbody = "<tbody  style=\"padding: 5px 5px; height: 400px\">";
+                        var tmp  = "";
+                        for(var i=0; i<n; i++) {
+                            var time_loc = "time" + i;
+                            var can_id_loc = "can_id" + i;
+                            var data_loc = "data_in_hex" + i;
+                            var description_loc = "description" + i;
+
+                            tmp = tmp + "<tr>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[time_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[can_id_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[data_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[description_loc] + "</td>";
+
+                            tmp = tmp + "</tr>";
+                        }
+
+                        if(n == 0) {
+                            tmp = tmp + "<tr>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp + "</tr>";
+                        }
+
+                        var tbody_end = "</tbody>";
+
+                        $('#side_effect_attack_description_div').append(tbody+tmp+tbody_end);
+                    }
+                })
+            })
+        })
+
+
+    $(function() {
+            // while循环中各种不同情况可以放到后台处理，是更加合理的
+            // 内容是合理的哦
+            $("#see_anormal_data").click(function() {
+                document.getElementById("myAnormalData").style.width = "900px";
+                document.getElementById("main").style.marginLeft = "900px";
+                document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+
+                var formdata = new FormData();
+
+                var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
+                formdata.append("csrfmiddlewaretoken", token_of_csrf);
+                // 至此，信息都是完整的
+                $.ajax({
+                url:"/see_anormal_data",
+                headers: {
+                    "X-CSRFToken":token_of_csrf
+                },
+                type:"post",
+                data: formdata,
+                dataType: 'JSON',
+                cache:false,
+                processData:false,
+                contentType:false,
+                success:function(target_list) {
+                    var n = target_list['size'];
+                    n = parseInt(n);
+                    //console.log(target_list);
+                    // 这里我们需要把文件修改为方便的json格式，需要自己生成？
+                    $('#anormal_table').empty();
+
+                    // <thead style="color:white"></thead>;
+                    var table = "<thead style=\"color:white\"><tr><th>时间time</th><th>can报文id</th><th>十六进制数据</th><th>攻击描述</th></tr></thead>";
+                    $('#anormal_table').append(table);
+                    var tbody = "<tbody  style=\"padding: 5px 5px; height: 400px; text-align: center\">";
+                    var tmp  = "";
+                    for(var i=0; i<n; i++) {
+                        // 下面需要构建报文
+                        var time_loc = "time" + i;
+                        var can_id_loc = "can_id" + i;
+                        var data_loc = "data_in_hex" + i;
+                        var description_loc = "description" + i;
+
+                        tmp = tmp + "<tr>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + target_list[time_loc] + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + target_list[can_id_loc] + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + target_list[data_loc] + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + target_list[description_loc] + "</td>";
+
+                        tmp = tmp + "</tr>";
+                    }
+
+                    if(n == 0) {
+                        tmp = tmp + "<tr>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + "id is not proper or time is too less" + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + "id is not proper or time is too less" + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + "id is not proper or time is too less" + "</td>";
+                        tmp = tmp+"<td>";
+                        tmp = tmp + "id is not proper or time is too less" + "</td>";
+                        tmp = tmp + "</tr>";
+                    }
+                    var tbody_end = "</tbody>";
+                    $('#anormal_table').append(tbody+tmp+tbody_end);
+                }
+            })
+            })
+        })
+
+</script>
+
+</body>
+</html>

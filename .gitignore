@@ -1,9 +1,14 @@
 /vehicle/CanConstruct/src/*
 /vehicle/ParseDetect/src/*
-/vehicle/ParseDetect/src/*
+/vehicle/LSTMModel/*
 /vehicle/lof_list
 /CanSrcLoc/*
 /CanConstruct/src/*
 /genarateAbnormalData/*
 /ParsingTargetDataframe/src/*
 CanConstruct.rar
+/vehicle_final_competition/CanConstruct/src/*
+/vehicle_final_competition/ParseDetect/src/*
+/vehicle_final_competition/lof_list
+/vehicle_final_competition/LSTMModel/model/variables/*
+/vehicle_final_competition/LSTMModel/model/variables/variables.data-00000-of-00001

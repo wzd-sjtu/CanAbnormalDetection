@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+<!-- 只要保证最后的读写内容是一个就可以了，还是比较easy的 随时可以修改内容！ -->
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent;text-align: center;">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+            <li><a href="/construct" style="color: #afd9ee"><strong>Construct</strong></a></li>
+            <li><a href="/construct/insert" style="color: #afd9ee"><strong>Insert Attack</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+<!-- 需要制造一个可以选择攻击的部分？ -->
+{% block construct_insert %}
+    <!-- 这里面是自己发挥的内容哦 -->
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+
+    <!-- 总而言之，想要好看，还是需要自己慢慢设计实现的 -->
+    <!-- 直接用模板总会出现意想不到的问题 -->
+    <!-- 生成的attack报文应当展示出来的， 我直接写的有问题， 很不舒服-->
+
+    <!-- 算是自己实现了一个简陋的攻击生成页面，解决了一些必要的冲突 -->
+    <!-- form提交以后，我们需要更新网页，将攻击内容显示出来 -->
+    <!-- 我裂开，为什么jquery无法使用呢？貌似存在冲突？ -->
+    <form role="form" style="text-align: center">
+        {% csrf_token %}
+        <div class="form-group" id="insert id" >
+        <!-- 之所以不显示，是因为这里的表单发生了冲突，并且冲突无法解决 -->
+        <label>选择注入的报文id</label>
+            <br/>
+                <label>
+                <select style="color:white;background-color: transparent;size:300px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;text-align: center;"
+                    id="chose_id">
+                    {% for item in targetChoics %}
+                        <option style="color:black">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label for="name">攻击持续时间（s）</label><br/>
+            <input  id="attack_exist_time" style="color:white;
+                        background-color: transparent;size:100px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;
+                        text-align: center;">
+        </div>
+
+        <div class="form-group">
+            <label for="name">注入报文的周期（s）</label><br/>
+            <input  id="attack_cycle_time" style="color:white;
+                        background-color: transparent;size:100px;height: 50px;
+                                border-color: greenyellow;border-radius: 10px;
+                        text-align: center;">
+        </div>
+        <!-- 这里涉及到了攻击的注入，只要把这个写好，总是可以飞黄腾达的 -->
+        <br/>
+        <label for="name">点击按钮生成攻击</label><br/>
+        <button type="button" class="btn btn-default"
+            style="color:white;background-color: transparent;font-size:18px;
+                    size:100px;height:50px;border-color: greenyellow;border-radius: 10px;"
+                id="make_insert_attack">生成攻击</button>
+    </form>
+
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>异常数据展示</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto" id="attack_description_div">
+                            <thead style="color:white">
+                                <tr>
+                                    <th>时间time</th>
+                                    <th>can报文id</th>
+                                    <th>十六进制数据</th>
+                                    <th>攻击描述</th>
+                                </tr>
+                            </thead>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                <br>
+            </div>
+        </ul>
+    </div>
+
+
+    <!-- 以前的我是万万看不明白这个jquery ajax的写法的，现在水平确实比以前要高不少了 -->
+    <!-- 现在看来，差不多完成了基本异常处理类的编写了 -->
+    <!-- 某些静态图像自动生成的功能还是暂时不要写了 以后有机会再加上去-->
+    <script src="/static/js/jquery-3.5.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/slick.js"></script>
+    <script src="/static/js/templatemo-script.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/npm.js"></script>
+    <script>
+        // 经过一系列复杂操作，终于获得了正确的html js响应，但是还需要一些美化操作，现在的界面太挫了
+        // 美化操作应当如何快速完成呢？暂时是不清楚的
+        $(function() {
+            $("#make_insert_attack").click(function() {
+                var formdata = new FormData();
+                formdata.append("chose_id", $("#chose_id").val());
+                formdata.append("attack_exist_time", $("#attack_exist_time").val());
+                formdata.append("attack_cycle_time", $("#attack_cycle_time").val());
+                var token_of_csrf = $('[name="csrfmiddlewaretoken"]').val();
+                formdata.append("csrfmiddlewaretoken", token_of_csrf);
+                // 发现是undefined的，需要找到对应的真实内容？
+                // console.log(token_of_csrf);
+                // 总算是把数据成功发送过去了，我真的是醉了哦
+                $.ajax({
+                    url:"/insert_attack",
+                    headers: {
+                        "X-CSRFToken":token_of_csrf
+                    },
+                    type:"post",
+                    data: formdata,
+                    dataType: 'JSON',
+                    cache:false,
+                    processData:false,
+                    contentType:false,
+                    success:function(target_list) {
+                        var n = target_list['size'];
+                        n = parseInt(n);
+                        var tbody = "<tbody  style=\"padding: 5px 5px; height: 400px\">";
+                        var tmp  = "";
+                        for(var i=0; i<n; i++) {
+                            // 下面需要构建报文
+                            var time_loc = "time" + i;
+                            var can_id_loc = "can_id" + i;
+                            var data_loc = "data_in_hex" + i;
+                            var description_loc = "description" + i;
+
+                            tmp = tmp + "<tr>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[time_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[can_id_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[data_loc] + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + target_list[description_loc] + "</td>";
+
+                            tmp = tmp + "</tr>";
+                        }
+
+                        if(n == 0) {
+                            tmp = tmp + "<tr>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp+"<td>";
+                            tmp = tmp + "id is not proper or time is too less" + "</td>";
+                            tmp = tmp + "</tr>";
+                        }
+
+                        var tbody_end = "</tbody>";
+
+                        $('#attack_description_div').append(tbody+tmp+tbody_end);
+                    }
+                })
+            })
+        })
+    </script>
+
+{% endblock %}
