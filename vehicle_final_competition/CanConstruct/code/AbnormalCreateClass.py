@@ -559,9 +559,9 @@ class AttackCreate:
 
                 ruleSingle = final_rule_list[random_num]
 
-                random_begin_bit = ruleSingle.begin_loc
+                random_begin_bit = int(ruleSingle.begin_loc)
                 length_of_bit = ruleSingle.length
-                random_end_bit = ruleSingle.end_loc
+                random_end_bit = int(ruleSingle.end_loc)
                 val_range = ruleSingle.range
 
 
@@ -572,7 +572,9 @@ class AttackCreate:
                 else: # multi表示有很多个数值，处理过程是合理的
                     descriptionTmp = descriptionTmp + "This is a multi value: "
 
-                descriptionTmp = "before binary is " + target_binary_bit[random_begin_bit:random_end_bit + 1]
+                # target_binary_bit = "".join(target_binary_bit)
+                # print(target_binary_bit[random_begin_bit:random_end_bit+1])
+                descriptionTmp = descriptionTmp + " before binary is " + target_binary_bit[random_begin_bit:random_end_bit + 1]
 
                 target_binary_bit = list(target_binary_bit)
                 for love in range(random_begin_bit, random_end_bit + 1):
