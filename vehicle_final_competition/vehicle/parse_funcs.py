@@ -19,114 +19,150 @@ from keras.preprocessing.sequence import pad_sequences
 def seq_id_statistics(id_list):
     """ 计算id序列的基本能统计特征：出现次数、平均周期、周期上下限，
         返回id的上述特征的字典 """
-    # unique id: numbers, first, last, prev, min_interval, max_interval
-    idRawStat = {}
-    idFinalStat = {}  # unique id: numbers, avg_interval, min, max
-    lineNo = 2
+    id_raw_stat = {}        # id: numbers, first, last, prev, min_interval, max_interval
+    id_weight_stat = {}     # id: mu, sigma, max_interval
+    line_No = 2
+
+    itv_list = {}
     length = len(id_list)
 
     for i in id_list:
-        if i not in idRawStat.keys():
-            idRawStat[i] = [1, lineNo, lineNo, lineNo, length, 0]
+        if i not in id_raw_stat.keys():
+            id_raw_stat[i] = [1, line_No, line_No, line_No, length, 0]
+            itv_list[i] = []
         else:
-            tmp = idRawStat[i]
-            idRawStat[i][0] += 1
-            idRawStat[i][2] = lineNo  # currNo
-            if (lineNo - tmp[3]) < tmp[4]:
-                idRawStat[i][4] = lineNo - tmp[3]
-            if (lineNo - tmp[3]) > tmp[5]:
-                idRawStat[i][5] = lineNo - tmp[3]
-            idRawStat[i][3] = lineNo
-        lineNo += 1
+            tmp = id_raw_stat[i]
+            id_raw_stat[i][0] += 1
+            id_raw_stat[i][2] = line_No  # currNo
+            itv_list[i].append(line_No - tmp[3])
+            if (line_No - tmp[3]) < tmp[4]:
+                id_raw_stat[i][4] = line_No - tmp[3]
+            if (line_No - tmp[3]) > tmp[5]:
+                id_raw_stat[i][5] = line_No - tmp[3]
+            id_raw_stat[i][3] = line_No
+        line_No += 1
 
-    for ID, info in idRawStat.items():
-        # (last occurrence - first occurrence) / (number-1)
-        if info[0] != 1:
-            avg_interval = (info[2] - info[1]) / (info[0] - 1)
-            idFinalStat[ID] = [info[0], round(avg_interval, 2), info[4], info[5]]
-        else:
-            idFinalStat[ID] = [1, 0, 0, 0]
+    for i, j in itv_list.items():
+        mu = float(numpy.mean(j))
+        sigma = float(numpy.std(j))
+        id_weight_stat[i] = [round(mu, 4), round(sigma, 4), id_raw_stat[i][5]]
 
-    return idFinalStat
+    return id_weight_stat
 
 
-def seq_id_survival_rate(id_list):
+def seq_id_survival_rate(id_list, id_weight_stat):
     """ 计算id序列的生存率，
         返回id生存率的最小和最大值字典 """
-    totalLen = len(id_list)
-    idSet = set(id_list)
-    SRDict = {}  # id : [min SR, max SR],
-    chunkLen = 100  # size of id_seq chunk
+
+    max_itv_list = [j[2] for j in id_weight_stat.values()]
+    max_itv = max(max_itv_list)
+
+    total_len = len(id_list)
+    id_set = set(id_list)
+    chunk_len = max_itv  # size of id_seq chunk
+    SR_dict = {}  # id : [min SR, max SR], ... , 'chunk_len': chunk_len
     pos = 0
 
-    while pos + chunkLen - 1 < totalLen:
+    while pos + chunk_len < total_len:
         # if the last chunk is shorter than chunkLen
         # attach it to the previous one
-        if pos + chunkLen * 2 - 1 < totalLen:
-            idChunk = id_list[pos:pos + chunkLen]
+        if pos + chunk_len * 2 < total_len:
+            id_chunk = id_list[pos:pos + chunk_len]
         else:
-            idChunk = id_list[pos:-1]
+            id_chunk = id_list[pos:-1]
 
         # update the minSR & maxSR in the chunk for every unique ID in idSeq
-        for i in idSet:
-            rate = idChunk.count(i) / chunkLen
-            if i not in SRDict.keys():
-                SRDict[i] = [rate, rate]
+        for i in id_set:
+            rate = id_chunk.count(i)
+            if i not in SR_dict.keys():
+                SR_dict[i] = [rate, rate]
             else:
-                SRDict[i] = [min(SRDict[i][0], rate), max(SRDict[i][1], rate)]
+                SR_dict[i] = [min(SR_dict[i][0], rate), max(SR_dict[i][1], rate)]
 
-        pos += chunkLen
+        pos += chunk_len
 
-    return SRDict
+    # for i in SR_dict.values():
+    #     i[0] = round(i[0], 4)
+    #     i[1] = round(i[1], 4)
 
+    SR_dict['chunk_len'] = chunk_len
 
-def cos_sim(FV):
-    """ 计算给定特征向量和单位向量之间的余弦相似度 """
-    UV = [1, 1, 1, 1]
-    dotpro = 0
-    mod1 = 0
-    mod2 = 0
-    for i in range(4):
-        dotpro += FV[i] * UV[i]
-        mod1 += FV[i] ** 2
-        mod2 += UV[i] ** 2
-    mod1 = mod1 ** 0.5
-    mod2 = mod2 ** 0.5
-    return dotpro / (mod1 * mod2)
+    return SR_dict
 
 
-def parse_seq_cos_sim(global_data):
+def correlation(FV):
+    UV = [4, 3, 2, 1]
+    E_fv = numpy.mean(FV)
+    E_uv = numpy.mean(UV)
+    std_fv = numpy.std(FV)
+    std_uv = numpy.std(UV)
+    length = len(FV)
+
+    cov = 0
+    for i in range(length):
+        cov += (FV[i] - E_fv) * (UV[i] - E_uv)
+    cov /= length
+    cor = cov / (std_fv * std_uv)
+    return cor
+
+
+def parse_seq_correlation(global_data, global_IDs):
     """ 计算id序列分块后，每块的余弦相似度，
         返回余弦相似度的列表 """
-    CSlist = []
-    FV = [0, 0, 0, 0]  # 不同的ID数, 消息总数, dlc之和, 带宽
-    idSet = []
-    cnt = 0
-    time_itv = 0.01  # 每个分段的时间间隔
-    for i in global_data:  # line: time, id, dlc, data
-        text = [i.time, i.id, i.length]
-        if float(text[0]) > cnt + time_itv and len(idSet) > 0:
-            FV[0] = len(idSet)  # num of distinct ID
-            FV[3] = (47 + FV[2] * 8) * FV[1] / 500000  # BW = (47b + DLC * 8b) * num of msg / 500Kbps
-            CSlist.append(cos_sim(FV))  # calculate cos similarity
-            # reset
-            cnt += time_itv
-            FV = [0, 0, 0, 0]
-            idSet = [text[1]]
-            FV[1] += 1
-            FV[2] += int(text[2])
-        else:
-            if text[1] not in idSet:
-                idSet.append(text[1])
-            FV[1] += 1
-            FV[2] += int(text[2])
+    cor_list = []  # final result, stores cos-sim of every sub-seqs
+    FV = [0, 0, 0, 0]  # [num of msg, num of unique ID, num of single ID, mean of ID value]
+    id_set = []  # stores every unique ID in a sub-seq
+    single_id = []  # stores every ID that occurs only once in a sub-seq
 
-    FV[0] = len(idSet)
-    FV[3] = (47 + FV[2] * 8) * FV[1] / 500000
-    CSlist.append(cos_sim(FV))
-    minCS = min(CSlist)
-    maxCS = max(CSlist)
-    return [minCS, maxCS]
+    occur_times = {}  # {ID: times of occurrence, ...}
+    s = set(global_IDs)
+    for i in s:
+        occur_times[i] = 0
+
+    curr_time = float(global_data[0].time)
+    time_itv = 0.1
+
+    for msg in global_data:  # msg: [timestamp ,ID]
+        # if a sub-sequence ends, calculate its cos similarity
+        if float(msg.time) > curr_time + time_itv and FV[0] != 0:
+            FV[1] = len(id_set)             # number of unique IDs
+            FV[2] = len(single_id) * 10     # number of IDs that occurred only once
+            FV[3] = FV[3] / FV[0] / 10      # the average of ID values
+
+            # calculate
+            cor = correlation(FV)
+            cor_list.append(cor)
+
+            # reset
+            curr_time += time_itv
+            FV = [0, 0, 0, 0]
+            single_id = [msg.id]
+            id_set = [msg.id]
+            FV[0] += 1  # number of all messages
+
+        # continue scanning for sub-sequence
+        else:
+            # the first occurrence of an ID in the sub-seq
+            if msg.id not in single_id and occur_times[msg.id] == 0:
+                single_id.append(msg.id)
+                occur_times[msg.id] = 1
+            # the repeated occurrence of an ID
+            if msg.id in single_id:
+                single_id.remove(msg.id)
+                occur_times[msg.id] += 1
+            # the first occurrence of a unique ID
+            if msg.id not in id_set:
+                id_set.append(msg.id)
+
+            FV[0] += 1
+
+            if "E+" in msg.id:
+                tmp_id = msg.id[0] + msg.id[4] + msg.id[7]
+            else:
+                tmp_id = msg.id
+            FV[3] += int(tmp_id, 16)
+
+    return [min(cor_list), max(cor_list)]
 
 
 def set_detect_seq_lstm(alphabet):

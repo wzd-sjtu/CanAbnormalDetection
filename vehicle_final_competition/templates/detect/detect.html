@@ -11,7 +11,7 @@
 {% block detect %}
     <div>
         <div class="col-md-2"></div>
-        <form class="col-md-5" method="post" enctype="multipart/form-data" action="/parse/">
+        <form class="col-md-5" method="post" enctype="multipart/form-data" action="/detect/">
             {% csrf_token %}
             <input type="file" name="myfile">
             </br>

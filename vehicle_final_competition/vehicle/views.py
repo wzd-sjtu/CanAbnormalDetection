@@ -53,7 +53,7 @@ def instantiate_global_data(file):
     global_IDs.clear()
     raw_lines = file.readlines()
     raw_lines.pop(0)
-    for line in raw_lines:
+    for line in raw_lines[:]:
         items = line.decode('utf-8').strip().split(',')
         # hex_to_dec = int(items[2], 16)
         # dec_to_bin = bin(hex_to_dec)[2:]
@@ -76,7 +76,7 @@ def instantiate_global_data_detect(file):
         items = line.decode('utf-8').strip().split(',')
         # hex_to_dec = int(items[2], 16)
         # dec_to_bin = bin(hex_to_dec)[2:]
-        sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3])
+        sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3], items[14])
         global_data_detect.append(sd)
         global_IDs_detect.append(items[2].upper())
 
@@ -104,11 +104,11 @@ def _parse_sequence(request):
     if global_data:
         global_features.clear()
         stat = pf.seq_id_statistics(global_IDs)
-        sr = pf.seq_id_survival_rate(global_IDs)
-        cos = pf.parse_seq_cos_sim(global_data)
-        feat = gm.NormalSeqFeatures(stat, sr, cos)
+        sr = pf.seq_id_survival_rate(global_IDs, stat)
+        correlation = pf.parse_seq_correlation(global_data, global_IDs)
+        feat = gm.NormalSeqFeatures(stat, sr, correlation)
         global_features.append(feat)
-        file = open("seq_feature_sor", 'wb')
+        file = open("./vehicle/seq_features_stor", 'wb')
         pickle.dump(global_features, file)
         return render(request, 'parse/sequence.html',
                       {'data': global_data, 'id': global_IDs, 'feat': global_features, 'targetChoics': allCanIdList})
@@ -173,6 +173,8 @@ def _detect_sequence(request):
 
 def _detect_datafield(request):
     global datafield_deviant, global_detect_data_frame, data_rule_dataframe
+    if data_rule_dataframe is None:
+        data_rule_dataframe = pd.read_pickle("./ParseDetect/src/_parse_rule.pkl")
     print(time.perf_counter())
     dd = DatafieldDetect(global_detect_data_frame, data_rule_dataframe)
     dd.run()
@@ -180,12 +182,12 @@ def _detect_datafield(request):
     datafield_deviant = dd.get_deviant()
     print(datafield_deviant)
     return render(request, 'detect/datafield.html',
-                  {'datafield_deviant': datafield_deviant, 'targetChoics': allCanIdList})
+                  {'datafield_deviant': datafield_deviant})
 
 
 def _detect_sequenceRelationship(request):
     if global_features:
-        ano1 = df.detect_seq_cos_sim(global_data_detect, global_features[0].cosSim)
+        ano1 = df.detect_seq_relative(global_data_detect, global_IDs_detect, global_features[0].correlation)
         ano2 = df.detect_seq_lstm(global_IDs,global_data_detect)
         anomalies = [ano1, ano2]
         return render(request, 'detect/seq_relate.html',
@@ -194,15 +196,19 @@ def _detect_sequenceRelationship(request):
         return render(request, 'detect/seq_relate.html', {'targetChoics': allCanIdList})
 
 
+
 def _detect_datafieldRelationship(request):
     global global_detect_data_frame, cluster_deviant
     global cluster_model_list, cluster_array
+    cluster_array = np.load('./ParseDetect/src/cluster_array.npy', allow_pickle=True)
+    with open('./ParseDetect/src/lof_list', 'rb')as f:
+        cluster_model_list = pickle.load(f)
     cd = ClusterDetect(cluster_array, global_detect_data_frame, cluster_model_list)
     cd.run()
     cluster_deviant = cd.get_deviant()
     print(cluster_deviant)
     return render(request, 'detect/df_relate.html',
-                  {'cluster_deviant': cluster_deviant, 'targetChoics': allCanIdList})
+                  {'cluster_deviant': cluster_deviant})
 
 
 
@@ -620,6 +626,7 @@ def first_detect(request):
         features = pickle.load(file)
         file.close()
         datas = []
+        IDs = []
         with open("./CanConstruct/src/attack_test/attack_data.csv", "r") as file:
             raw_lines = file.readlines()
             raw_lines.pop(0)
@@ -627,29 +634,30 @@ def first_detect(request):
                 items = line.split(',')
                 # hex_to_dec = int(items[2], 16)
                 # dec_to_bin = bin(hex_to_dec)[2:]
-                sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3])
+                sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3], items[14])
                 datas.append(sd)
-
+                IDs.append(items[2].upper())
         # ano1 = [[tmpID, curr - prev, i.number, i.time], ...]
         ano1 = df.detect_seq_id_statistics(datas, features[0].stat)
         # ano2 = [[ID, [global_data[pos-99].time, tmpSingleData.time], round(prob, 2)], ...]
         ano2 = df.detect_seq_id_survival_rate(datas, features[0].SR)
         # ano3 = [[int(cnt / time_itv), [initTime, text[0]],  cs], ...]
-        ano3 = df.detect_seq_cos_sim(datas, features[0].cosSim)
+        ano3 = df.detect_seq_relative(datas, IDs, features[0].correlation)
         # print(ano3)
 
         # generate total des list
         total_ano = []  # [[id, time, des], ...]
         for i in ano1:
             if i[1] == -1:
-                total_ano.append([i[0], i[3], '从未出现过的ID'])
+                total_ano.append([str(i[0]), str(i[3]), '从未出现过的ID'])
             else:
-                total_ano.append([i[0], i[3], 'ID间隔异常: ' + str(i[1])])
+                total_ano.append([str(i[0]), str(i[3]), 'ID间隔异常: ' + str(i[1])])
         for i in ano2:
-            total_ano.append([i[0], i[1][0] + '~' + i[1][1], 'ID生存率异常: ' + str(i[2])])
+            total_ano.append([str(i[0]), str(i[1][0]) + '~' + str(i[1][1]), 'ID生存率异常: ' + str(i[2])])
         for i in ano3:
-            total_ano.append(['第' + str(i[0]) + '子段', i[1][0] + '~' + i[1][1], '余弦相似度异常: ' + str(i[2])])
-
+            total_ano.append(['第' + str(i[0]) + '子段', str(i[1][0]) + '~' + str(i[1][1]), '相关系数异常: ' + str(i[2])])
+        if len(total_ano) == 0:
+            total_ano.append([str("------"), str("无异常"), str("------"), str("------")])
         target_dict = {}
         total_length = len(total_ano)
         target_dict['size'] = str(total_length)

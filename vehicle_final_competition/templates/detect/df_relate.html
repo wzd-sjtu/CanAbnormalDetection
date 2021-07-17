@@ -67,7 +67,7 @@
         </ol>
       </div>
 {% endblock %}
-{% block detect_data_cluster %}
+{% block detect_datafield %}
     <div class="container-fluid tm-content-container">
         <ul class="cd-hero-slider mb-0 py-5">
             <div style="text-align: center">
@@ -89,7 +89,7 @@
                             </thead>
                             <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
 
-                            {% for index,row in datafield_deviant.iterrows %}
+                            {% for index,row in cluster_deviant.iterrows %}
                                 <tr>
                                     <td>{{ row.time }}</td>
                                     <td>{{ row.can_id }}</td>

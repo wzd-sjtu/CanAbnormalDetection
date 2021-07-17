@@ -82,10 +82,9 @@
                             <thead style="color:white">
                             <tr>
                                 <th>ID</th>
-                                <th>出现次数</th>
-                                <th>平均间隔</th>
-                                <th>最小间隔</th>
-                                <th>最大间隔</th>
+                                <th>周期均值</th>
+                                <th>周期标准差</th>
+                                <th>最大周期</th>
                             </tr>
                             </thead>
                             <tbody id="parse_seq_stat" style="padding: 5px 5px">
@@ -96,7 +95,6 @@
                                     <td>{{ string.0 }}</td>
                                     <td>{{ string.1 }}</td>
                                     <td>{{ string.2 }}</td>
-                                    <td>{{ string.3 }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -126,11 +124,13 @@
                             </thead>
                             <tbody id="parse_seq_stat" style="padding: 5px 5px">
                                 {% for id, string in feat.0.SR.items %}
+                                    {% if id != 'chunk_len' %}
                                     <tr>
                                         <td>{{ id }}</td>
                                         <td>{{ string.0 }}</td>
                                         <td>{{ string.1 }}</td>
                                     </tr>
+                                    {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -142,7 +142,7 @@
                 <br>
             </div>
             <div style="text-align: center">
-                <h1>Cosine Similarity of sub sequences</h1>
+                <h1>子序列相关系数</h1>
             </div>
             <div class="mx-auto position-relative gallery-container">
                 <div class="circle intro-circle-1"></div>
@@ -152,14 +152,14 @@
                         <table style="width:80%; margin: auto">
                             <thead style="color:white">
                             <tr>
-                                <th>最小余弦相似度</th>
-                                <th>最大余弦相似度</th>
+                                <th>最小相关系数</th>
+                                <th>最大相关系数</th>
                             </tr>
                             </thead>
                             <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 100px;">
                                     <tr>
-                                        <td>{{ feat.0.cosSim.0 }}</td>
-                                        <td>{{ feat.0.cosSim.1 }}</td>
+                                        <td>{{ feat.0.correlation.0 }}</td>
+                                        <td>{{ feat.0.correlation.1 }}</td>
                                     </tr>
                             </tbody>
                         </table>

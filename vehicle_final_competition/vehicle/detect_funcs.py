@@ -1,5 +1,5 @@
 # 存放用以检测数据的函数，返回报错信息
-from .parse_funcs import cos_sim
+from .parse_funcs import correlation
 from typing import Pattern
 import numpy
 
@@ -20,103 +20,156 @@ from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 
 
-def detect_seq_id_statistics(global_data, idFinalStat):
-    idAppear = {}  # ID: prev, curr
-    uniqueIDs = idFinalStat.keys()
+def weightCalc(ID, interval, id_weight_stat):
+    """Calculate the weight of the ID according to its interval"""
+    mu = id_weight_stat[ID][0]
+    sigma = id_weight_stat[ID][1]
 
+    expo = (interval - mu)**2 / (2 * sigma * sigma)
+
+    return expo
+
+
+def detect_seq_id_statistics(global_data, id_weight_stat):
     anomalies = []
+    threshold = 10
 
-    for i in global_data:
-        tmpID = i.id
-        if tmpID not in uniqueIDs:
-            anomalies.append([tmpID, -1, i.number, i.time])
+    idSet = set(id_weight_stat.keys())
+    idInterval = {}  # id: last_occur
+    weights = []
+
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
+
+    for sd in global_data:
+        No = int(sd.number)
+        ID = sd.id
+        ano = sd.anomaly
+        time = sd.time
+
+        if ID not in idSet:
+            anomalies.append([ID, -1, No, time])
             continue
-        elif tmpID not in idAppear.keys():
-            idAppear[tmpID] = [i.number, i.number]
+
+        if ID not in idInterval.keys():
+            idInterval[ID] = No
         else:
-            prev = int(idAppear[tmpID][1])
-            curr = int(i.number)
-            idAppear[tmpID] = [prev, curr]
-            if curr - prev < idFinalStat[tmpID][2] or curr - prev > idFinalStat[tmpID][3]:
-                anomalies.append([tmpID, curr - prev, i.number, i.time])
+            itv = No - idInterval[ID]
+            idInterval[ID] = No
+
+            weight = weightCalc(ID, itv, id_weight_stat)
+            weights.append(weight)
+
+            if weight >= threshold:
+                anomalies.append([ID, itv, No, time])
+    #             if str(ano) == '0':
+    #                 FP += 1
+    #             else:
+    #                 TP += 1
+    #                 # print(ID, itv, No, ano, weight)
+    #         else:
+    #             if str(ano) == '0':
+    #                 TN += 1
+    #             else:
+    #                 FN += 1
+    # TPR = TP / (TP + FN)
+    # FPR = FP / (FP + TN)
+    # print(threshold, TPR, FPR)
+
+    # anomalies.append([tmpID, curr - prev, i.number, i.time])
     return anomalies  # html中通过 {{ dano.0 }} 调用此变量
 
 
-def detect_seq_id_survival_rate(global_data, SRDict):
-    idChunk = {}  # {ID: probability in a chunk, ...}
+def detect_seq_id_survival_rate(global_data, SR_dict):
+    id_chunk = {}  # {ID: probability in a chunk, ...}
     length = len(global_data)
-    chunk = 100
-    sig = 1 / chunk  # probability of one occurrence
+    chunk = SR_dict['chunk_len']
+    # sig = 1 / chunk  # probability of one occurrence
     pos = 0  # global position
-    chunkPos = 0  # position in a chunk
+    chunk_pos = 0  # position in a chunk
 
     anomalies = []
 
     while pos < length:
-        tmpSingleData = global_data[pos]
-        ID = tmpSingleData.id
-        if ID not in SRDict.keys():
+        tmp_single_data = global_data[pos]
+        ID = tmp_single_data.id
+        if ID not in SR_dict.keys():
             pos += 1
-            chunkPos = (chunkPos + 1) % chunk
+            chunk_pos = (chunk_pos + 1) % chunk
+            # unidentified
             continue
 
-        if ID in idChunk.keys():
-            idChunk[ID] += sig
+        if ID in id_chunk.keys():
+            id_chunk[ID] += 1
         else:
-            idChunk[ID] = sig
+            id_chunk[ID] = 1
 
-        if chunkPos == chunk - 1:
-            for ID, prob in idChunk.items():
-                if prob > SRDict[ID][1] or prob < SRDict[ID][0]:
-                    anomalies.append([ID, [global_data[pos - 99].time, tmpSingleData.time], round(prob, 2)])
-            idChunk.clear()
+        if chunk_pos == chunk - 1:
+            for ID, prob in id_chunk.items():
+                if prob > SR_dict[ID][1] or prob < SR_dict[ID][0]:
+                    anomalies.append([ID, [global_data[pos - chunk + 1].time, tmp_single_data.time], round(prob, 2)])
+            id_chunk.clear()
         pos += 1
-        chunkPos = (chunkPos + 1) % chunk
+        chunk_pos = (chunk_pos + 1) % chunk
     return anomalies  # html中通过 {{ dano.1 }} 调用此变量
 
 
-def detect_seq_cos_sim(global_data_detect, CSlist):
+def detect_seq_relative(global_data_detect, global_IDs_detect, cor_list):
     FV = [0, 0, 0, 0]  # num of distinct ID, num of msg, dlc Sum, Band Width
     idSet = []
-    cnt = 0
-    time_itv = 0.01
-    minCS = CSlist[0]
-    maxCS = CSlist[1]
+    singleID = []
+    cnt = float(global_data_detect[0].time)
+    time_itv = 0.1
+    min_cor = cor_list[0]
+    max_cor = cor_list[1]
 
-    initTime = ''
+    appearTimes = {}
+    s = set(global_IDs_detect)
+    for i in s:
+        appearTimes[i] = 0
 
     anomalies = []
 
-    for i in global_data_detect:  # line: time, id, dlc, data
-        text = [i.time, i.id, i.length]
-        if float(text[0]) > cnt + time_itv and len(idSet) > 0:
-            FV[0] = len(idSet)  # num of distinct ID
-            FV[3] = (47 + FV[2] * 8) * FV[1] / 500000  # BW = (47b + DLC * 8b) * num of msg / 500Kbps
+    for line in global_data_detect:
+        text = [line.time, line.id]
+        if float(text[0]) > cnt + time_itv and FV[0] != 0:
+            FV[1] = len(idSet)
+            FV[2] = len(singleID)
+            FV[3] = FV[3] / FV[0] / 10
 
-            cs = cos_sim(FV)  # calculate cos similarity
-            if cs < minCS or cs > maxCS:
-                anomalies.append([int(cnt / time_itv), [initTime, text[0]], cs])
+            cor = correlation(FV)  # calculate correlation
+            if cor < min_cor or cor > max_cor:
+                anomalies.append([int(cnt / time_itv), [cnt, text[0]], cor])
 
             # reset
             cnt += time_itv
             FV = [0, 0, 0, 0]
+            singleID = [text[1]]
             idSet = [text[1]]
-            initTime = ''
-            FV[1] += 1
-            FV[2] += int(text[2])
+            FV[0] += 1
         else:
+            if text[1] not in singleID and appearTimes[text[1]] == 0:
+                singleID.append(text[1])
+                appearTimes[text[1]] = 1
+            if text[1] in singleID:
+                singleID.remove(text[1])
+                appearTimes[text[1]] += 1
             if text[1] not in idSet:
                 idSet.append(text[1])
-                if len(idSet) == 1:
-                    initTime = text[0]
-            FV[1] += 1
-            FV[2] += int(text[2])
+            FV[0] += 1
+            if "E+" in text[1]:
+                tmp_id = text[1][0] + text[1][4] + text[1][7]
+            else:
+                tmp_id = text[1]
+            FV[3] += int(tmp_id, 16)
 
     return anomalies  # html中通过 {{ dano.0 }} 调用此变量
 
 
 def detect_seq_lstm(alphabet, letterRaw):
-    model = load_model("../vehicle/LSTMModel/model/")
+    model = load_model("./LSTMModel/model/")
     anomalies = []
     # alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     # create mapping of characters to integers (0-25) and the reverse

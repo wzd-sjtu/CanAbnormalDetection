@@ -475,7 +475,10 @@ class ParseData:
             self.value_store_list.append(classfy_result.classfy_value_store)
 
     def get_result(self):
-        return self.result_frame
+        tmp_result = pd.DataFrame(self.result_frame, copy=True)
+        for index, row in tmp_result.iterrows():
+            row['type'] = type_dict[row['type']]
+        return tmp_result
 
     def to_dataframe(self):
 

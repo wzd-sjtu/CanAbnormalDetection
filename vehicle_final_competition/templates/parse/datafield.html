@@ -10,14 +10,81 @@
     </div>
 {% endblock %}
 {% block parse_datafield %}
-    {{ data.20.time }}
-    {{ data.20.id }}
-    {{ id.20 }}
-    {{ feat.0.SR }}
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>数据域分段规则</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>CANID</th>
+                                <th>起始字节</th>
+                                <th>长度</th>
+                                <th>类型</th>
+                                <th>规则</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for index,row in data_rule.iterrows %}
+                                <tr>
+                                    <td>{{ index }}</td>
+                                    <td>{{ row.begin_loc }}</td>
+                                    <td>{{ row.length }}</td>
+                                    <td>{{ row.type }}</td>
+                                    <td>{{ row.value_list }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                <br>
+            </div>
+            <div style="text-align: center">
+                <h1>传感器关联规则</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        {% for cluster in cluster_array %}
+                            <table style="width:80%; margin: auto">
+                                <thead style="color:white">
+                                <tr>
+                                    <th>CANID</th>
+                                    <th>字节</th>
+                                </tr>
+                                </thead>
+                                <tbody id="parse_seq_stat" style="padding: 5px 5px; height:400px">
+                                {% for single in cluster %}
+                                    <tr>
+                                        <td>{{ single.canid }}</td>
+                                        <td>{{ single.byte }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </ul>
+    </div>
     <script type="text/javascript">
         var item = document.getElementById("web_title");
-        item.innerHTML = "Parse";
+        item.innerHTML = "Detect";
         item = document.getElementById("web_logo");
-        item.innerHTML = "Parse";
+        item.innerHTML = "Detect";
     </script>
 {% endblock %}
