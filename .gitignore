@@ -1,6 +1,8 @@
 /vehicle/CanConstruct/src/*
 /vehicle/ParseDetect/src/*
 /vehicle/LSTMModel/*
+/vehicle/LSTMModel/*
+/vehicle/LSTMModel/model/variables/variables.data-00000-of-00001
 /vehicle/lof_list
 /CanSrcLoc/*
 /CanConstruct/src/*

@@ -85,6 +85,7 @@ def instantiate_global_data_detect(file):
     global_detect_data_frame = pd.read_csv(file, index_col=0)
 
 
+
 def home(request):
     return render(request, 'home.html', {'targetChoics': allCanIdList})
 
@@ -811,7 +812,7 @@ def fourth_detect(request):
         cd = ClusterDetect(cluster_array, detect_data, lof_list)
         cd.run()
         cluster_deviant = cd.get_deviant()
-        print(cluster_deviant)
+        # print(cluster_deviant)
         # print(cluster_deviant)
 
         target_dict = {}
@@ -852,3 +853,143 @@ def see_anormal_data(request):
 
         response = JsonResponse(target_dict)
         return response
+
+
+# 以下是代码中的新函数
+def cloud_system(request):
+    return render(request, 'CloudSystem/cloud_system.html', {'targetChoics': allCanIdList})
+
+# 暂时规定为检测所有的内容喽
+# 需要的解析时间为23s左右，需要提前解析出规则？难以理解understand
+def parse_cloud_system(request):
+
+    # 相似度关联信息引入
+    # 确保上传了对应的文件
+    # LSTM不用在这里展示了 对滴
+
+    global_features.clear()
+    stat = pf.seq_id_statistics(global_IDs)
+    sr = pf.seq_id_survival_rate(global_IDs, stat)
+    correlation = pf.parse_seq_correlation(global_data, global_IDs)
+    feat = gm.NormalSeqFeatures(stat, sr, correlation)
+    global_features.append(feat)
+    file = open("./vehicle/seq_features_stor", 'wb')
+    pickle.dump(global_features, file)
+
+    cluster_array = np.load('./ParseDetect/src/cluster_array.npy', allow_pickle=True)
+    cluster_dict_array = []
+    for element in cluster_array:
+        tmp_array = []
+        for single_thing in element:
+            tmp = single_thing.split('_')
+            tmp_dict = {}
+            tmp_dict['canid'] = tmp[0]
+            tmp_dict['byte'] = "D" + tmp[1]
+            tmp_array.append(tmp_dict)
+        cluster_dict_array.append(tmp_array)
+
+    # print(cluster_dict_array)
+    # 这里的cluter_dict_array需要适当修改一下？
+
+    return render(request, 'CloudSystem/cloud_system_parse_result.html',
+                  {'cluster_array': cluster_dict_array,
+                   'targetChoics': allCanIdList,
+                   'data': global_data,
+                   'id': global_IDs,
+                   'feat': global_features, })
+
+
+def detect_cloud_system(request):
+    # 在这里进行了较为complex的检测
+    # 检测时，子序列相关系数的结果并没有放在这里emm
+    # 序列关联性检测
+    # global_features是什么信息呢？暂时是不清楚的
+
+    ano1 = df.detect_seq_relative(global_data_detect, global_IDs_detect, global_features[0].correlation)
+    #ano2 = df.detect_seq_lstm(global_IDs, global_data_detect)
+    #anomalies = [ano1, ano2]
+    anomalies = [ano1]
+
+    # 数据域关联性检测
+    global global_detect_data_frame, cluster_deviant
+    global cluster_model_list, cluster_array
+    cluster_array = np.load('./ParseDetect/src/cluster_array.npy', allow_pickle=True)
+    with open('./ParseDetect/src/lof_list', 'rb')as f:
+        cluster_model_list = pickle.load(f)
+    cd = ClusterDetect(cluster_array, global_detect_data_frame, cluster_model_list)
+    cd.run()
+    cluster_deviant = cd.get_deviant()
+    # print(cluster_deviant)
+
+    return render(request, 'CloudSystem/cloud_system_detect_result.html',
+                  {'ddata': global_data_detect,
+                   'did': global_IDs_detect,
+                   'dano': anomalies,
+                   'targetChoics': allCanIdList,
+                   'cluster_deviant': cluster_deviant})
+
+# 在这里继续使用上传文件的logic了
+def upload_cloud_system_parse(request):
+    file = request.FILES.get('myfile')
+
+    items = []
+    if file:
+
+        instantiate_global_data(file)
+        # print("I am happy!!")
+        return render(request, 'CloudSystem/cloud_system.html', {'data': global_data, 'id': global_IDs, 'targetChoics': allCanIdList})
+    else:
+        return render(request, 'CloudSystem/cloud_system.html', {'targetChoics': allCanIdList})
+def upload_cloud_system_detect(request):
+    file = request.FILES.get('myfile')
+
+    items = []
+    # 打开了某一个比较小的文件？这里的logic是复杂的
+
+    if file:
+
+        instantiate_global_data_detect(file)
+        # 上传的文件应该有覆盖的作用？需要配合韩国数据集来不断操作emm
+        # 这里涉及到了对数据集的不同演示区域
+
+        if(file.name=="attack_data.csv"):
+            print("I am happy!!")
+        else:
+            print("I am unhappy!!")
+            # AbnormalDescriptionClass
+            # 为了动态更新异常数据，这里引入了逻辑框的相互引导，处理逻辑是较为合适的
+            # 直接使用AbnormalDescriptionClass的API处理文件内部信息即可
+            # API的使用方法详见AbnormalDescriptionClass文件，处理流程总归是合理的
+
+
+        return render(request, 'CloudSystem/cloud_system.html', {'ddata': global_data_detect, 'did': global_IDs_detect,'targetChoics': allCanIdList})
+    else:
+        return render(request, 'CloudSystem/cloud_system.html', {'targetChoics': allCanIdList})
+def instantiate_all_data(file):
+    global_data.clear()
+    global_IDs.clear()
+    global_data_detect.clear()
+    global_IDs_detect.clear()
+
+    raw_lines = file.readlines()
+    raw_lines.pop(0)
+    for line in raw_lines[:]:
+        items = line.decode('utf-8').strip().split(',')
+        # hex_to_dec = int(items[2], 16)
+        # dec_to_bin = bin(hex_to_dec)[2:]
+        sd = gm.SingleData(items[0], items[2].upper(), items[1], items[3])
+        global_data.append(sd)
+        global_IDs.append(items[2].upper())
+
+        sd = gm.SingleDataDetect(items[0], items[2].upper(), items[1], items[3], items[14])
+        global_data_detect.append(sd)
+        global_IDs_detect.append(items[2].upper())
+
+    # 等于是初始化了两倍的信息
+    global global_dataframe
+    file.seek(0)
+    global_dataframe = pd.read_csv(file, index_col=0)
+
+    global global_detect_data_frame
+    file.seek(0)
+    global_detect_data_frame = pd.read_csv(file, index_col=0)

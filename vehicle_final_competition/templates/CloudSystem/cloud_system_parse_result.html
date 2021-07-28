@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+    <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+            <li><a href="/cloud_system" style="color: #afd9ee"><strong>CloudSystem</strong></a></li>
+            <li><a href="/parse_cloud_system" style="color: #afd9ee"><strong>Parse</strong></a></li>
+        </ol>
+    </div>
+{% endblock %}
+{% block parse_datafield %}
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+
+            <div style="text-align: center">
+                <h1>子序列相关系数</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>最小相关系数</th>
+                                <th>最大相关系数</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 100px;">
+                                    <tr>
+                                        <td>{{ feat.0.correlation.0 }}</td>
+                                        <td>{{ feat.0.correlation.1 }}</td>
+                                    </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center">
+                <h1>传感器关联规则</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        {% for cluster in cluster_array %}
+                            <table style="width:80%; margin: auto">
+                                <thead style="color:white">
+                                <tr>
+                                    <th>CANID</th>
+                                    <th>字节</th>
+                                </tr>
+                                </thead>
+                                <tbody id="parse_seq_stat" style="padding: 5px 5px; height:400px">
+                                {% for single in cluster %}
+                                    <tr>
+                                        <td>{{ single.canid }}</td>
+                                        <td>{{ single.byte }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </ul>
+    </div>
+
+    <!-- 在这中间还需要补一个简单的LSTM检测的小按钮？ -->
+
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Detect";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Detect";
+    </script>
+{% endblock %}

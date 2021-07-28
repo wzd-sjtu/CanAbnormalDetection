@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+    <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+            <li><a href="/cloud_system" style="color: #afd9ee"><strong>CloudSystem</strong></a></li>
+            <li><a href="/detect_cloud_system" style="color: #afd9ee"><strong>Detect</strong></a></li>
+        </ol>
+    </div>
+{% endblock %}
+{% block parse_datafield %}
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">
+            <div style="text-align: center">
+                <h1>子序列 相关系数检测</h1>>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>ID段</th>
+                                <th>出现时间段</th>
+                                <th>异常相关系数</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for chunk, itv, cs in dano.0 %}
+                                <tr>
+                                    <td>{{ chunk }}</td>
+                                    <td>{{ itv.0 }} ~ {{ itv.1 }}</td>
+                                    <td>{{ cs }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center">
+                <h1>LSTM训练结果</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>检测时间段</th>
+                                <th>预测字段</th>
+                                <th>是否错误</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for b, e, result, ifwrong in dano.1 %}
+                                <tr>
+                                    <td>{{ b }} ~ {{ e }}</td>
+                                    <td>{{ result }}</td>
+                                    <td>{{ ifwrong }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center">
+                <h1>聚类分析检测</h1>
+            </div>
+            <div class="mx-auto position-relative gallery-container">
+                <div class="circle intro-circle-1"></div>
+                <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div>
+                        <table style="width:80%; margin: auto">
+                            <thead style="color:white">
+                            <tr>
+                                <th>时间</th>
+                                <th>CANID</th>
+                                <th>数据</th>
+                                <th>错误描述</th>
+                            </tr>
+                            </thead>
+                            <tbody id="parse_seq_stat" style="padding: 5px 5px; height: 400px">
+
+                            {% for index,row in cluster_deviant.iterrows %}
+                                <tr>
+                                    <td>{{ row.time }}</td>
+                                    <td>{{ row.can_id }}</td>
+                                    <td>{{ row.data_in_hex }}</td>
+                                    <td>{{ row.Description }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </ul>
+    </div>
+
+    <!-- 在这中间还需要补一个简单的LSTM检测的小按钮？ -->
+
+    <script type="text/javascript">
+        var item = document.getElementById("web_title");
+        item.innerHTML = "Detect";
+        item = document.getElementById("web_logo");
+        item.innerHTML = "Detect";
+    </script>
+{% endblock %}

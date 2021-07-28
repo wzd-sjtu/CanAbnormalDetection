@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block nav %}
+    <br>
+      <div style="font-size: large">
+        <ol class="breadcrumb" style="background-color: transparent">
+            <li><a href="/" style="color: #afd9ee"><strong>Home</strong></a></li>
+            <li><a href="/cloud_system" style="color: #afd9ee"><strong>CloudSystem</strong></a></li>
+        </ol>
+      </div>
+{% endblock %}
+
+
+{% block home %}
+
+    <div>
+        <div class="col-md-2"></div>
+        <form class="col-md-5" method="post" enctype="multipart/form-data" action="/upload_cloud_system_parse/">
+            {% csrf_token %}
+            <input type="file" name="myfile">
+            </br>
+            <button class="submit" type="submit">上传训练文件</button>
+        </form>
+        <div class="col-md-4"></div>
+    </div>
+
+    <br>
+
+    <div>
+        <div class="col-md-2"></div>
+        <form class="col-md-5" method="post" enctype="multipart/form-data" action="/upload_cloud_system_detect/">
+            {% csrf_token %}
+            <input type="file" name="myfile">
+            </br>
+            <button class="submit" type="submit">上传检测文件</button>
+        </form>
+        <div class="col-md-4"></div>
+    </div>
+
+
+    <div class="container-fluid tm-content-container">
+        <ul class="cd-hero-slider mb-0 py-5">  <!-- 这里的模型感觉是非常的复杂的，在某种程度上来说是难以处理的 -->
+            <h1 style="text-align: center">云端检测系统</h1>
+            </br>
+            <div class="mx-auto position-relative gallery-container">
+            <div class="circle intro-circle-1"></div>
+            <div class="circle intro-circle-2"></div>
+                <div class="mx-auto tm-border-top gallery-slider">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/parse_cloud_system'>解析</a></h1>
+                                <p class="mb-4" style="font-size: large;text-align: center;">
+                                    对输入数据解析，得到训练模型及其规则表
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="intro-left tm-bg-dark" style="height: 100%">
+                                <h1 class="mb-4" style="text-align: center"><a href='/detect_cloud_system'>异常检测</a></h1>
+                                <p class="mb-4" style="font-size: large;text-align: center;">
+                                    对输入的报文进行异常检测
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ul>
+    </div>
+
+
+
+
+    <script type="text/javascript">
+        var item = document.getElementById("homehref")
+        item.setAttribute("class", "nav-item selected")
+    </script>
+{% endblock %}

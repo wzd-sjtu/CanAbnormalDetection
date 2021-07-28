@@ -67,4 +67,12 @@ urlpatterns = [
     path('fourth_table', views.fourth_detect),
 
     path('see_anormal_data', views.see_anormal_data),
+
+    path('cloud_system', views.cloud_system),
+    path('parse_cloud_system', views.parse_cloud_system),
+    path('detect_cloud_system', views.detect_cloud_system),
+    path('upload_cloud_system_parse/', views.upload_cloud_system_parse),
+    path('upload_cloud_system_detect/', views.upload_cloud_system_detect),
+
+    # 此外，还要加入一些基础的动态AJAX，典型的LSTM就需要单独拉出来，降低时间复杂度？对滴
 ]
